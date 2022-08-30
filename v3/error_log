@@ -1,0 +1,63 @@
+[02-Mar-2020 18:09:18 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/1581934969.pdf): No such file or directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[02-Mar-2020 18:35:31 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[02-Mar-2020 21:50:27 asia/kolkata] PHP Notice:  Undefined index: mobile_data in /home/webvep3v/public_html/arvindam/v3/reports.php on line 26
+[02-Mar-2020 21:50:34 asia/kolkata] PHP Notice:  Undefined index: mobile_data in /home/webvep3v/public_html/arvindam/v3/reports.php on line 26
+[02-Mar-2020 21:50:49 asia/kolkata] PHP Notice:  Undefined index: mobile_data in /home/webvep3v/public_html/arvindam/v3/reports.php on line 26
+[02-Mar-2020 21:58:20 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[02-Mar-2020 22:00:51 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[02-Mar-2020 22:01:48 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[02-Mar-2020 22:05:07 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[02-Mar-2020 22:15:45 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[02-Mar-2020 22:17:15 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[03-Mar-2020 12:07:42 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[03-Mar-2020 15:05:08 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[03-Mar-2020 15:23:39 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[03-Mar-2020 15:29:33 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[04-Mar-2020 02:09:11 asia/kolkata] PHP Deprecated:  Methods with the same name as their class will not be constructors in a future version of PHP; toWords has a deprecated constructor in /home/webvep3v/public_html/arvindam/v3/amount_to_word.php on line 4
+[04-Mar-2020 17:38:22 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[04-Mar-2020 18:40:59 asia/kolkata] PHP Notice:  Undefined variable: result in /home/webvep3v/public_html/arvindam/v3/get_compnay_area.php on line 14
+[04-Mar-2020 18:40:59 asia/kolkata] PHP Notice:  Undefined variable: result in /home/webvep3v/public_html/arvindam/v3/get_compnay_area.php on line 23
+[04-Mar-2020 23:05:31 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[05-Mar-2020 04:56:46 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[05-Mar-2020 10:35:12 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[05-Mar-2020 17:13:11 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined method Crud::checkdata() in /home/webvep3v/public_html/arvindam/v3/profile.php:25
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/profile.php on line 25
+[05-Mar-2020 17:20:58 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined method Crud::checkdata() in /home/webvep3v/public_html/arvindam/v3/profile.php:23
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/profile.php on line 23
+[05-Mar-2020 17:21:05 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined method Crud::checkdata() in /home/webvep3v/public_html/arvindam/v3/profile.php:23
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/profile.php on line 23
+[05-Mar-2020 17:21:42 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined function rint_r() in /home/webvep3v/public_html/arvindam/v3/profile.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/profile.php on line 24
+[05-Mar-2020 17:21:46 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined function rint_r() in /home/webvep3v/public_html/arvindam/v3/profile.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/profile.php on line 24
+[05-Mar-2020 11:54:03 Etc/GMT] PHP Parse error:  syntax error, unexpected '$result' (T_VARIABLE) in /home/webvep3v/public_html/arvindam/v3/profile.php on line 24
+[05-Mar-2020 17:33:36 asia/kolkata] PHP Notice:  Undefined variable: res in /home/webvep3v/public_html/arvindam/v3/profile.php on line 30
+[05-Mar-2020 17:38:41 asia/kolkata] PHP Notice:  Undefined variable: res in /home/webvep3v/public_html/arvindam/v3/profile.php on line 30
+[05-Mar-2020 17:38:41 asia/kolkata] PHP Notice:  Undefined variable: res in /home/webvep3v/public_html/arvindam/v3/profile.php on line 31
+[05-Mar-2020 17:53:22 asia/kolkata] PHP Warning:  unlink(../uploads/finance/652517c78e46IMG): No such file or directory in /home/webvep3v/public_html/arvindam/v3/approve_image.php on line 48
+[05-Mar-2020 17:53:25 asia/kolkata] PHP Warning:  unlink(../uploads/finance/6531383127e7IMG): No such file or directory in /home/webvep3v/public_html/arvindam/v3/approve_image.php on line 48
+[05-Mar-2020 17:58:14 asia/kolkata] PHP Notice:  Undefined variable: res in /home/webvep3v/public_html/arvindam/v3/profile.php on line 30
+[05-Mar-2020 17:58:14 asia/kolkata] PHP Notice:  Undefined variable: res in /home/webvep3v/public_html/arvindam/v3/profile.php on line 31
+[05-Mar-2020 18:31:03 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined function now() in /home/webvep3v/public_html/arvindam/v3/dashboard.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/dashboard.php on line 7
+[05-Mar-2020 18:31:12 asia/kolkata] PHP Fatal error:  Uncaught Error: Call to undefined function now() in /home/webvep3v/public_html/arvindam/v3/dashboard.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/dashboard.php on line 7
+[06-Mar-2020 12:57:32 asia/kolkata] PHP Warning:  unlink(../uploads/finance/pdf/): Is a directory in /home/webvep3v/public_html/arvindam/v3/uplode_pdf.php on line 19
+[07-Mar-2020 07:19:25 Etc/GMT] PHP Parse error:  syntax error, unexpected '*' in /home/webvep3v/public_html/arvindam/v3/reports.php on line 55
+[07-Mar-2020 07:19:33 Etc/GMT] PHP Parse error:  syntax error, unexpected '*' in /home/webvep3v/public_html/arvindam/v3/reports.php on line 55
+[07-Mar-2020 07:19:39 Etc/GMT] PHP Parse error:  syntax error, unexpected '*' in /home/webvep3v/public_html/arvindam/v3/reports.php on line 55
+[07-Mar-2020 08:56:14 Etc/GMT] PHP Parse error:  syntax error, unexpected 'unset' (T_UNSET) in /home/webvep3v/public_html/arvindam/v3/reports.php on line 55

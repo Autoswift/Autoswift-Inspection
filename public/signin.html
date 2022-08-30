@@ -1,0 +1,96 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Admin Portal : AutoSwift</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="icon" href="../uploads/image/logo_auto.png">
+<meta name="keywords" content="" />
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<!-- Bootstrap Core CSS -->
+<link href="css/bootstrap.min.css" rel='stylesheet' type='text/css' />
+<!-- Custom CSS -->
+<link href="css/style.css" rel='stylesheet' type='text/css' />
+<link rel="stylesheet" href="css/morris.css" type="text/css"/>
+<!-- Graph CSS -->
+<link href="css/font-awesome.css" rel="stylesheet">
+<link rel="stylesheet" href="css/jquery-ui.css"> 
+<!-- jQuery -->
+<script src="js/jquery-2.1.4.min.js"></script>
+<!-- //jQuery -->
+<link href='//fonts.googleapis.com/css?family=Roboto:700,500,300,100italic,100,400' rel='stylesheet' type='text/css'/>
+<link href='//fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+<!-- lined-icons -->
+<link rel="stylesheet" href="css/icon-font.min.css" type='text/css' />
+ <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/1.3.1/css/toastr.css">
+<!-- //lined-icons -->
+</head> 
+<body>
+	<div class="main-wthree">
+	<div class="container">
+	<div class="sin-w3-agile">
+		<h2>Admin Portal : Sign In</h2>
+		<form  method="post" id="login_form">
+			<div class="username">
+				<span class="username">Username:</span>
+				<input type="text" name="user_name" id="user_name" class="name" placeholder="" required="">
+				<div class="clearfix"></div>
+			</div>
+			<div class="password-agileits">
+				<span class="username">Password:</span>
+				<input type="password" name="user_password" id="user_password" class="password" placeholder="" required="">
+				<div class="clearfix"></div>
+			</div>
+			<div class="rem-for-agile">
+				
+			</div>
+			<div class="login-w3">
+					<input type="submit" class="login" value="Sign In" id="login-btn">
+			</div>
+			<div class="clearfix"></div>
+		</form>
+				<div class="back">
+					&nbsp;
+				</div>
+				<div class="footer">
+					 <p>© 2016 AutoSwift. All Rights Reserved </p>
+				</div>
+	</div>
+	</div>
+	</div>
+</body>
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/1.3.1/js/toastr.js"></script>
+<script type="text/javascript">
+    $(document).ready( function () {
+    	localStorage.removeItem("atad");
+        $('#login_form').submit(function(event){
+            $("#login-btn").prop('disabled',true);
+            event.preventDefault()
+            $("body").css("opacity","0.7");
+                username = $('#user_name').val();
+                password = $('#user_password').val();
+             $.ajax({
+              type:"OPTION",
+              url:"../v3/auth/login.php",
+              dataType:"json",
+              data:JSON.stringify({username:username,password:password}),
+              contentType: 'application/json',
+              success: function(response){
+                if(response.token!=''){
+                    toastr.success('',"Login Success");
+                    localStorage.setItem("atad",response.token);
+                     setTimeout(function(){
+                      window.location='index.html';
+                     },1500); 
+                }else{
+                     toastr.error(response.message,"Error"); 
+                }
+                $("body").removeAttr('style');
+                $("#login-btn").prop('disabled',false); 
+              }
+          });
+        });     
+    });
+</script>

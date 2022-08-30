@@ -1,0 +1,5 @@
+[02-Mar-2020 12:06:19 Etc/GMT] PHP Fatal error:  Uncaught Error: Call to undefined function mcrypt_create_iv() in /home/webvep3v/public_html/arvindam/v3/auth/auth.php:95
+Stack trace:
+#0 /home/webvep3v/public_html/arvindam/v3/auth/login.php(23): auth->gettoken(Array)
+#1 {main}
+  thrown in /home/webvep3v/public_html/arvindam/v3/auth/auth.php on line 95

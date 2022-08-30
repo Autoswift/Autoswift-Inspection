@@ -1,0 +1,495 @@
+
+<!DOCTYPE HTML>
+<html>
+<head>
+<title> Admin Portal : AutoSwift</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="keywords" content="Pooled Responsive web template, Bootstrap Web Templates, Flat Web Templates, Android Compatible web template, 
+Smartphone Compatible web template, free webdesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+<link rel="icon" href="../uploads/image/logo_auto.png">
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<!-- Bootstrap Core CSS -->
+<link href="css/bootstrap.min.css" rel='stylesheet' type='text/css' />
+<!-- Custom CSS -->
+<link href="css/style.css" rel='stylesheet' type='text/css' />
+<link rel="stylesheet" href="css/morris.css" type="text/css"/>
+<link href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/ui-lightness/jquery-ui.css' rel='stylesheet'> 	
+<!-- Graph CSS -->
+<link href="css/font-awesome.css" rel="stylesheet"> 
+<!-- jQuery -->
+<script src="js/jquery-2.1.4.min.js"></script>
+<!-- //jQuery -->
+<link href='//fonts.googleapis.com/css?family=Roboto:700,500,300,100italic,100,400' rel='stylesheet' type='text/css'/>
+<link href='//fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+<!-- lined-icons -->
+<link rel="stylesheet" href="css/icon-font.min.css" type='text/css' />
+ <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/1.3.1/css/toastr.css">
+<!-- //lined-icons -->
+<style type="text/css">
+.profile_details{
+	    width: 30.25%;
+	    float: right;
+	   }
+ul.dropdown-menu.drp-mnu i.fa{
+	 	margin-top: -6px;
+	}
+table th {
+		color: black;
+	}   	    
+</style>
+</head> 
+<body>
+   <div class="page-container">
+   <!--/content-inner-->
+<div class="left-content">
+	   <div class="mother-grid-inner">
+             <!--header start here-->
+				<div class="header-main">
+					<div class="logo-w3-agile" style="widht:11.25%">
+								<img src="images/logo_auto.png" style="width: 70px;height: 38px;">
+							</div>
+					<div class="w3layouts-right" style="width: 55%;height: 70px;">
+								<div class="user-name"><p id="comp_name"></p></div>
+							</div>
+						
+					<div class="profile_details w3l" style="float:left;width: 7.48%;height: 70px;">
+								 <label class="btn btn-sm upload-img ml-50 mb-50 mb-sm-0 cursor-pointer change-button" for="account-upload"><span class="prfil-img"><img src="images/in4.jpg" alt="" id="pf_image"> </span></label>
+                                <input type="file" id="account-upload" hidden="" name="profile_pic" style="display:none">
+                                   
+							</div>
+						<div class="profile_details w3l" style="width:23.25%; height:70px;">
+								<ul>
+									<li class="dropdown profile_details_drop">
+										<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+											<div class="profile_img">
+												<div class="user-name">
+													<p id="user_log">Admin</p>
+													<span>Mobile Admin</span>
+												</div>
+												<i class="fa fa-angle-down"></i>
+												<i class="fa fa-angle-up"></i>
+												<div class="clearfix"></div>	
+											</div>	
+										</a>
+										<ul class="dropdown-menu drp-mnu">
+											<li> <a href="signin.html"><i class="fa fa-sign-out"></i> Logout</a> </li>
+										</ul>
+									</li>
+								</ul>
+							</div>
+							
+				     <div class="clearfix"> </div>	
+				</div>
+<!--heder end here-->
+		<ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a> <i class="fa fa-angle-right"></i>Dashboard</li>
+            </ol>
+<!--four-grids here-->
+		<div class="four-grids">
+					<div class="col-md-4 four-grid">
+						<div class="four-agileits">
+							<div class="icon">
+								<i class="glyphicon fa fa-clock-o" aria-hidden="true"></i>
+							</div>
+							<a href="reports.html?status=Pending">
+							<div class="four-text">
+								<h3>Pending</h3>
+								<h4 id="pending">0</h4>	
+							</div>
+							</a>
+						</div>
+					</div>
+					<div class="col-md-4 four-grid">
+						<div class="four-agileinfo">
+							<div class="icon">
+								<i class="glyphicon fa fa-check" aria-hidden="true"></i>
+							</div>
+							<a href="reports.html?status=Approve">
+							<div class="four-text">
+								<h3>Approved</h3>
+								<h4 id="approved">0</h4>
+							</div>
+							</a>
+						</div>
+					</div>
+					<div class="col-md-4 four-grid">
+						<div class="four-w3ls">
+							<div class="icon">
+								<i class="glyphicon  fa fa-check-circle" aria-hidden="true"></i>
+							</div>
+							<a href="reports.html?status=Complete">
+							<div class="four-text">
+								<h3>Completed</h3>
+								<h4 id="completed">0</h4>	
+							</div>
+							</a>
+						</div>
+					</div>
+					
+					<div class="clearfix"></div>
+				</div>
+<!--//four-grids here-->
+<!--agileinfo-grap-->
+	<!-- <div class="agileinfo-grap">
+	<div class="agileits-box">
+	<header class="agileits-box-header clearfix">
+	<h3>Statistics</h3>
+		<div class="toolbar">
+			<div class="pull-left">
+				<div class="btn-group">
+					<a href="#" class="btn btn-default btn-xs">Daily</a>
+					<a href="#" class="btn btn-default btn-xs active">Monthly</a>
+					<a href="#" class="btn btn-default btn-xs">Yearly</a>
+				</div>
+			</div>
+			<div class="pull-right">
+				<div class="btn-group">
+				  <a aria-expanded="false" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+					Export <i class="fa fa-angle-down"></i>
+				  </a>
+				  <ul class="dropdown-menu pull-right" role="menu">
+					<li><a href="#">Export as PDF</a></li>
+					<li><a href="#">Export as CSV</a></li>
+					<li><a href="#">Export as PNG</a></li>
+					<li class="divider"></li>
+					<li><a href="#">Separated link</a></li>
+				  </ul>
+				</div>
+				<a href="#" class="btn btn-primary btn-xs"><i class="fa fa-cog"></i></a>
+			</div>
+		</div>
+	</header>
+	<div class="agileits-box-body clearfix">
+	<div id="hero-area"></div>
+	</div>
+	</div>
+	</div> -->
+	<!--//agileinfo-grap-->
+<!--photoday-section-->	
+			
+                        
+                    	<div class="col-sm-6 wthree-crd">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="widget widget-report-table">
+                                        <header class="widget-header m-b-15">
+                                        </header>
+                                        
+                                        <div class="row m-0 md-bg-grey-100 p-l-20 p-r-20">
+                                            <div class="col-md-6 col-sm-6 col-xs-6 w3layouts-aug">
+                                                <h3>Daily Record</h3>
+                                                <p>REPORT</p>
+                                            </div>
+                                            <div class="col-md-6 col-sm-6 col-xs-6 ">
+                                               <!--  <h2 class="text-right c-teal f-300 m-t-20">$21,235</h2> -->
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="widget-body p-15">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Pending</th>
+                                                        <th>COMPLETED</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="date">0</td>
+														<td id="daily_total">0</td>
+                                                        <td id="daily_complate">0</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 wthree-crd">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="widget widget-report-table">
+                                        <header class="widget-header m-b-15">
+                                        </header>
+                                        
+                                        <div class="row m-0 md-bg-grey-100 p-l-20 p-r-20">
+                                            <div class="col-md-6 col-sm-6 col-xs-6 w3layouts-aug">
+                                                <h3>Monthly Record</h3>
+                                                <p>REPORT</p>
+                                            </div>
+                                            <div class="col-md-6 col-sm-6 col-xs-6 ">
+                                                <!-- <h2 class="text-right c-teal f-300 m-t-20">$21,235</h2> -->
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="widget-body p-15">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Month</th>
+                                                        <th>Pending</th>
+                                                        <th>COMPLETED</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="month">0</td>
+                                                        <td id="month_total">0</td>
+														<td id="month_complate">0</td>
+                                                    </tr>
+                                                    
+                                                </tbody>
+                                            </table>    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    		   
+						<div class="clearfix"></div>
+                   
+	<!--//photoday-section-->	
+	<!--w3-agileits-pane-->	
+	<div class="w3-agileits-pane">
+		<div class="charts">
+					<div class="col-md-12 w3layouts-char">
+						<div class="charts-grids widget">
+							<h4 class="title">File Chart</h4>
+							<canvas id="bar"> </canvas>
+						</div>
+					</div>
+					
+					<div class="clearfix"> </div>
+							 <script>
+							 	
+							</script>
+							
+				</div>
+		<div class="col-md-4 wthree-pan">
+			<div class="panel panel-default">
+			 
+			  <!-- /.panel-heading -->
+			  
+			  <!-- /.panel-body --> 
+			</div>
+		  </div>
+		<div class="col-md-8 agile-info-stat">
+			
+			</div>
+		  <div class="clearfix"></div>
+	  </div>
+	   <script src="js/auth.js"></script>
+	  <!--//w3-agileits-pane-->	
+<!-- script-for sticky-nav -->
+		<script>
+		$(document).ready(function() {
+			 var navoffeset=$(".header-main").offset().top;
+			 $(window).scroll(function(){
+				var scrollpos=$(window).scrollTop(); 
+				if(scrollpos >=navoffeset){
+					$(".header-main").addClass("fixed");
+				}else{
+					$(".header-main").removeClass("fixed");
+				}
+			 });
+			 
+		});
+		</script>
+		<!-- /script-for sticky-nav -->
+<!--inner block start here-->
+<div class="inner-block">
+
+</div>
+<!--inner block end here-->
+<!--copy rights start here-->
+
+<!--COPY rights end here-->
+</div>
+</div>
+  <!--//content-inner-->
+			<!--/sidebar-menu-->
+				<div class="sidebar-menu">
+					<header class="logo1">
+						<a href="#" class="sidebar-icon"> <span class="fa fa-bars"></span> </a> 
+					</header>
+						<div style="border-top:1px ridge rgba(255, 255, 255, 0.15)"></div>
+                           <div class="menu">
+									<ul id="menu" >
+										<li><a href="index.html"><i class="fa fa-tachometer"></i> <span>Dashboard</span><div class="clearfix"></div></a></li>
+										<li><a href="mobile_executive.html"><i class="fa fa-user"></i> <span>Mobile Executive</span><div class="clearfix"></div></a></li>
+										<li><a href="notification.html"><i class="fa fa-bell"></i> <span>Notification</span><div class="clearfix"></div></a></li>
+										<li><a href="#" data-toggle="modal" data-target="#downloadModel"><i class="fa fa-file-excel-o"></i> <span>Download</span><div class="clearfix"></div></a></li>
+								  </ul>
+								</div>
+							  </div>
+							  <div class="clearfix"></div>		
+							</div>
+	<div id="downloadModel" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Download Excel</h4>
+      </div>
+      <div class="modal-body">
+        <form id="download_form" method="post">
+         	<div class="vali-form">
+            
+            <div class="col-md-6 form-group1">
+              <label class="control-label">Valuation Record from</label>
+              <input type="text" class="pickadate"name="s_date" id="s_date" required="">
+            </div>
+           
+            <div class="col-md-6 form-group1 form-last">
+              <label class="control-label">Valuation Record to</label>
+              <input type="text" class="pickadate"  name="e_date" id="e_date" required="">
+            </div>
+				<div class="col-md-12 form-group2 group-mail"></div>
+            <div class="clearfix"> </div>
+            </div>
+            
+            
+             <div class="clearfix"> </div>
+          
+            <div class="col-md-12 form-group">
+              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="reset" class="btn btn-default">Reset</button>
+            </div>
+          <div class="clearfix"> </div>
+        </form>
+      </div>
+      
+    </div>
+
+  </div>
+</div>	   
+							<script>
+							var toggle = true;
+										
+							$(".sidebar-icon").click(function() {                
+							  if (toggle)
+							  {
+								$(".page-container").addClass("sidebar-collapsed").removeClass("sidebar-collapsed-back");
+								$("#menu span").css({"position":"absolute"});
+							  }
+							  else
+							  {
+								$(".page-container").removeClass("sidebar-collapsed").addClass("sidebar-collapsed-back");
+								setTimeout(function() {
+								  $("#menu span").css({"position":"relative"});
+								}, 400);
+							  }
+											
+											toggle = !toggle;
+										});
+							</script>
+<!--js -->
+	
+<script src="js/jquery.nicescroll.js"></script>
+<script src="js/scripts.js"></script>
+<!-- Bootstrap Core JavaScript -->
+   <script src="js/bootstrap.min.js"></script>
+   <!-- /Bootstrap Core JavaScript -->	   
+<!-- morris JavaScript -->	
+<script src="js/raphael-min.js"></script>
+<script src="js/morris.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js"></script>
+<script src="js/Chart.js"></script>
+</body>
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/1.3.1/js/toastr.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" ></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$( ".pickadate" ).datepicker({
+        dateFormat: 'dd-mm-yy', 
+    });
+    $( ".pickadate" ).prop('autocomplete','off');
+$('#download_form').submit(function(event){
+	event.preventDefault();
+    $.ajax({
+        url:"../v3/make_excel_admin.php",
+        type:"POST",
+        headers: {'x-api-key': token},
+        data:$("#download_form").serialize(),
+        success:function(response)
+        {
+          if(response.status==true){
+                top.location.href = "../uploads/tmp/"+response.result;
+			  	$('#downloadModel').modal('hide');
+			  	$('#download_form').trigger('reset');
+                toastr.success(response.result,"success");
+            }else{
+                toastr.error(response.message,"Error");
+            }
+            
+        }
+
+    })
+ });
+		$.ajax({
+			type:"GET",
+            url:"../v3/admin_dash.php",
+            headers: {'x-api-key': token },
+            success: function(response){
+            	
+            	if(response.result){
+            		result=response.result
+            		$('#pending').text(result.pending.pending);
+            		$('#approved').text(result.approve.approve);
+            		$('#completed').text(result.complete.complete);
+
+            		$('#date').text(moment().format('DD-MM-YYYY'));
+            	    $('#daily_complate').text(result.daily.complete.daily_complate);
+            		$('#daily_total').text(result.daily.pending.pending);
+
+            		$('#month').text(moment().format('MMMM-YYYY'));
+            		$('#month_complate').text(result.month.month_complate.month_complate);
+            		$('#month_total').text(result.month.month_pending.pending);
+            	}
+              }
+		})
+		var data=[]
+							 	var labels=[]
+							 	$.ajax({
+							 		 type:"OPTION",
+           	 						 url:"../v3/admin_report.php",
+            						 headers: {'x-api-key': token },
+						             success: function (res){
+						             	$.each(res.result, function( index, value ) {
+						             		data.push(value.count)
+						             		labels.push(GetMonthName(value.month))
+										});
+						             	var barChartData = {
+										labels : labels,
+										datasets : [
+													{
+														fillColor : "rgb(199, 54, 39)",
+														strokeColor : "rgba(233, 78, 2, 0.9)",
+														highlightFill: "#e74c3c",
+														highlightStroke: "#e74c3c",
+														data : data
+													}
+												]
+												
+											};
+											
+										new Chart(document.getElementById("bar").getContext("2d")).Bar(barChartData);
+						             }
+
+							 	})
+								
+							function GetMonthName(monthNumber) {
+
+								var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+								return months[monthNumber - 1];
+
+								}
+	})
+	
+</script>
