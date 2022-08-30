@@ -15,7 +15,7 @@ class DuplicateController extends Controller
      public function index()
     {
         $duplicate = Duplicate::orderBy('position', 'ASC')->get();
-        return view('Duplicate.index',compact('duplicate',$duplicate));
+        return view('Duplicate.index',compact('duplicate'));
     }
 
     /**
@@ -76,7 +76,7 @@ class DuplicateController extends Controller
     public function edit(Duplicate $duplicate)
     {
         //
-        return view('Duplicate.edit',compact('duplicate',$duplicate));
+        return view('Duplicate.edit',compact('duplicate'));
     }
 
     /**

@@ -17,7 +17,7 @@ class ValuationController extends Controller
     public function index()
     {
         $valuation = Valuation::orderBy('position')->latest()->get();
-        return view('Valuation.index',compact('valuation',$valuation));
+        return view('Valuation.index',compact('valuation'));
     }
 
     /**
@@ -75,7 +75,7 @@ class ValuationController extends Controller
     public function edit(Valuation $valuation)
     {
         //
-        return view('Valuation.edit',compact('valuation',$valuation));
+        return view('Valuation.edit',compact('valuation'));
     }
 
     /**

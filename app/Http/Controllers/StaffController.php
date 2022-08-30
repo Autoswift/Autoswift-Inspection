@@ -15,7 +15,7 @@ class StaffController extends Controller
     public function index()
     {
         $staff = Staff::orderBy('position')->get();
-        return view('Staff.index',compact('staff',$staff));
+        return view('Staff.index',compact('staff'));
     }
 
     /**
@@ -78,7 +78,7 @@ class StaffController extends Controller
     public function edit(Staff $staff)
     {
          $this->authorize('isSuper');
-        return view('Staff.edit',compact('staff',$staff));
+        return view('Staff.edit',compact('staff'));
     }
 
     /**

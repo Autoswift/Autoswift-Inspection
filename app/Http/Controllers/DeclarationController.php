@@ -15,7 +15,7 @@ class DeclarationController extends Controller
     public function index()
     {
         $declaration = Declaration::orderBy('position')->get();
-        return view('Declaration.index',compact('declaration',$declaration));
+        return view('Declaration.index',compact('declaration'));
     }
 
     /**
@@ -74,7 +74,7 @@ class DeclarationController extends Controller
      */
     public function edit(Declaration $declaration)
     {
-         return view('Declaration.edit',compact('declaration',$declaration));
+         return view('Declaration.edit',compact('declaration'));
     }
 
     /**

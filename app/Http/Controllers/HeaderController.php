@@ -16,7 +16,7 @@ class HeaderController extends Controller
     public function index()
     {
         $header = Header::all();
-        return view('Header.index',compact('header',$header));
+        return view('Header.index',compact('header'));
     }
 
     /**
@@ -59,7 +59,7 @@ class HeaderController extends Controller
      */
     public function edit(Header $header)
     {
-        return view('Header.edit',compact('header',$header));
+        return view('Header.edit',compact('header'));
     }
 
     /**

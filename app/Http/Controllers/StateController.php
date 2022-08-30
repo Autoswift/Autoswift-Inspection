@@ -14,7 +14,7 @@ class StateController extends Controller
     public function index()
     {
         $state = State::latest()->get();
-        return view('Area.indexstate',compact('state',$state));
+        return view('Area.indexstate',compact('state'));
     }
 
     /**
@@ -65,7 +65,7 @@ class StateController extends Controller
     public function edit(State $state)
     {
         $this->authorize('isSuper');
-        return view('Area.editstate',compact('state',$state));
+        return view('Area.editstate',compact('state'));
     }
 
     /**

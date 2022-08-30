@@ -89,7 +89,7 @@ class AreaController extends Controller
     public function edit(Area $area)
     {
           $all_state = State::pluck('name', 'id');
-        return view('Area.edit',compact('area',$area,'all_state'));
+        return view('Area.edit',compact('area','all_state'));
     }
 
     /**

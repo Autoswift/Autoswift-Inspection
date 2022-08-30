@@ -20,7 +20,7 @@ class UserController extends Controller
     {   
         $this->authorize('isSuper');
         $users = User::orderBy('id','desc')->get();
-        return view('User.index',compact('users',$users));
+        return view('User.index',compact('users'));
     }
 
     /**
@@ -149,7 +149,7 @@ class UserController extends Controller
         else{
            $users = User::where('role','=',$role)->orderBy('id','desc')->get();
         } 
-        return view('User.index',compact('users',$users));
+        return view('User.index',compact('users'));
     }
 
     /**
@@ -278,7 +278,7 @@ class UserController extends Controller
            $users=$users->orderBy('id','desc')->get();
         }
       
-        return view('User.index',compact('users',$users));
+        return view('User.index',compact('users'));
     }
     public function changereferno(Request $request){
         $request->validate([
