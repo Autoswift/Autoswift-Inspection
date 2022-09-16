@@ -159,10 +159,10 @@ $urlroot=\Request::route()->getName();
                         <div class="input text"><input type="text" name="e_date" class="form-control datepicker" id="from" placeholder="Search Bill Date To" type="text"></div>
                      </div>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="create_date" class="form-control datepicker" id="createTo" placeholder="Search Record From" type="text"></div>
+                        <div class="input text"><input type="text" name="create_date" class="form-control datepicker" id="createTo" placeholder="Search Creation Date From" type="text"></div>
                      </div>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="create_end" class="form-control datepicker" id="createFrom" placeholder="Search Record To" type="text"></div>
+                        <div class="input text"><input type="text" name="create_end" class="form-control datepicker" id="createFrom" placeholder="Search Creation Date To" type="text"></div>
                      </div>
                      <div class="col-md-2">
                         <div class="input text"><input name="amount_from" class="form-control" placeholder="Amount From" type="text" id="FinanceAmountFrom"></div>
@@ -357,7 +357,14 @@ $urlroot=\Request::route()->getName();
          headers: {
              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
          }
-    }); 
+    });
+
+$(document).keypress(function (e) {
+	if (e.which == 13) {
+    $('#search').trigger('click');
+  }
+});
+	
    $('#search').click(function(){
       event.preventDefault();
       $('#report_table').DataTable().destroy();

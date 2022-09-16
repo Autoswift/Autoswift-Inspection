@@ -5,7 +5,7 @@ return [
     /*
      * Enable it?
      */
-    'enabled' => true,
+    'enabled' => false,
 
     /*
      * Enable cache?
@@ -57,7 +57,8 @@ return [
      */
     'do_not_track_ips' => [
         '127.0.0.0/24', /// range 127.0.0.1 - 127.0.0.255
-        '127.0.0.1:8081'
+        '127.0.0.1:8081',
+        '127.0.0.1'
     ],
 
     /*

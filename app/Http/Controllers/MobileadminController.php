@@ -306,6 +306,7 @@ class MobileadminController extends Controller
         header('Content-type: application/vnd.xlsx');
         header('Content-Disposition: attachment; filename="'.$name.'"');
         $writer->save('php://output');
+		exit;
         return true;
     }
 }
