@@ -40,7 +40,7 @@ class Export implements FromCollection, WithHeadings, WithEvents, WithCustomStar
 	
 	public function startCell(): string
     {
-        return 'A2';
+        return 'A3';
     }
 
     /**

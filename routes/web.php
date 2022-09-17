@@ -49,6 +49,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('downlaodbackup/{filename}','MakeBackup@downlaodbackup')->name('downlaodbackup');
 		Route::delete('deletebackup/{filename}','MakeBackup@deletebackup')->name('deletebackup');
 		Route::post('image_backup','MakeBackup@image_backup')->name('image_backup');
+		Route::post('report_excel','FinanceController@report_excel')->name('report_excel');
 		Route::post('make_excel','FinanceController@make_excel')->name('make_excel');
 		Route::get('deleted_report','FinanceController@deleted_report')->name('deleted_report');
 		Route::post('report_restore/{id?}','FinanceController@report_restore')->name('report_restore');

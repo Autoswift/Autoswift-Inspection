@@ -95,20 +95,21 @@ $urlroot=\Request::route()->getName();
          <div class="col-lg-12">
             <h1 class="page-header">
                <small id="page-header">@if($urlroot=='report.index')
-                           {{ __('Generate Bill') }}
-                           @endif
-                           @if($urlroot=='today_report')
-                           {{ __("Today's Reports") }}
-                           @endif
-                           @if($urlroot=='duplicate_report')
-                           {{ __('Duplicate Reports') }}
-                           @endif
-                           @if($urlroot=='mobile_report')
-                           {{ __('Mobile Reports') }}
-                           @endif
-                           @if($urlroot=='old_reports')
-                           {{ __('Old Reports') }}
-                           @endif</small> 
+			   {{ __('Generate Bill') }}
+			   @endif
+			   @if($urlroot=='today_report')
+			   {{ __("Today's Reports") }}
+			   @endif
+			   @if($urlroot=='duplicate_report')
+			   {{ __('Duplicate Reports') }}
+			   @endif
+			   @if($urlroot=='mobile_report')
+			   {{ __('Mobile Reports') }}
+			   @endif
+			   @if($urlroot=='old_reports')
+			   {{ __('Old Reports') }}
+			   @endif
+			   </small> 
             </h1>
             <ol class="breadcrumb">
                <li>
@@ -126,7 +127,7 @@ $urlroot=\Request::route()->getName();
       <div class="row" style="margin:20px 0;">
          <div>
             <div style="border: 1px solid rgb(204, 204, 204); padding: 15px 0 0 0;">
-               <form id="FinanceOldForm" action="{{route('make_excel')}}" method="post" >
+               <form id="FinanceOldForm" action="@if($urlroot=='report.index') {{route('make_excel')}} @else {{route('report_excel')}} @endif" method="post" >
                   @csrf
                   <div style="display:none;"><input type="hidden" name="_method" value="POST"></div>
                   <div class="form-group" style="overflow: hidden;">
@@ -215,10 +216,34 @@ $urlroot=\Request::route()->getName();
                      @if($urlroot=='today_report')
                        <div class="col-md-1">
                         <div class="input submit">
-                            <a href="{{route('today_report_excel')}}"><button type="button" class="btn btn-default"style="font-weight:bold;">Excel</button></a>
+							<button name="today_report" value="<?php echo date('d-m-Y'); ?>" type="submit" class="btn btn-default"style="font-weight:bold;">Excel</button>
                         </div>
                       </div>
                      @endif
+					
+                     @if($urlroot=='old_reports')
+                      <div class="col-md-1">
+                        <div class="input submit">
+                            <button name="old_reports" value="1" type="submit" class="btn btn-default"style="font-weight:bold;">Excel</button>
+                        </div>
+                      </div>
+                      @endif
+					
+                     @if($urlroot=='mobile_report')
+                      <div class="col-md-1">
+                        <div class="input submit">
+                            <button name="mobile_data" value="1" type="submit" class="btn btn-default"style="font-weight:bold;">Excel</button>
+                        </div>
+                      </div>
+                      @endif
+					
+                     @if($urlroot=='duplicate_report')
+                      <div class="col-md-1">
+                        <div class="input submit">
+                            <button name="duplicate_entry" value="1" type="submit" class="btn btn-default"style="font-weight:bold;">Excel</button>
+                        </div>
+                      </div>
+                      @endif
                       
                      <!-- <div class="col-md-1">
                         </div> -->

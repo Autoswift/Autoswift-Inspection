@@ -34,6 +34,201 @@ class FinanceController extends Controller
 	public function __construct() {
 		$this->alphabet = range('A', 'Z');
 	}
+	
+	public function reportsFilterData ($filterdata) {
+		$data = Finance::select('finances.*','valuations.name','users.name as created_by')->leftJoin('valuations','finances.valuation_by','=','valuations.id')->leftJoin('users','finances.user_id','=','users.id');
+		$filtring = false;
+		if($filterdata){
+			if(!empty($filterdata['mobile_data'])){
+				$data->where('finances.mobile_data','=',1);
+				$data->whereNull('finances.report_date');
+			} else {
+				$data->where('finances.mobile_data','!=',1);
+			}
+			if(!empty($filterdata['today_report'])){
+				if(Auth()->user()->role==2){
+					$data->where('finances.user_id','=',Auth()->user()->id);  
+				}
+				$data->whereNotNull('finances.report_date');    
+				$data->whereDate('finances.created_at','=',date('Y-m-d'));
+				$filtring = true;
+			}
+			if(!empty($filterdata['duplicate_entry'])){
+				$data->where('finances.duplicate_entry','=',1);
+				$filtring = true;
+			}
+			if(!empty($filterdata['valuation_by'])){
+				$data->where('finances.valuation_by','=',$filterdata['valuation_by']);
+				$filtring = true;
+			}
+			if(!empty($filterdata['financer_representative'])){
+				$data->where('finances.financer_representative','Like','%'.$filterdata['financer_representative'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['make_model'])){
+				//$data->where('finances.make_model','Like','%'.$filterdata['make_model'].'%');
+				$make_model_arr = explode(" ", $filterdata['make_model']);
+				foreach($make_model_arr as $mma) {
+					$data->where('finances.make_model','Like','%'.$mma.'%');
+				}
+				$filtring = true;
+			}
+			if(!empty($filterdata['registration_no'])){
+				$data->where('finances.registration_no','Like','%'.$filterdata['registration_no'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['reference_no'])){
+				$data->where('finances.reference_no','Like','%'.$filterdata['reference_no'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['financed_by'])){
+				$data->where('finances.financed_by','Like','%'.$filterdata['financed_by'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['amount_from'])){
+				$data->where('finances.total_amount','>=',$filterdata['amount_from']);
+				$filtring = true;
+			}
+			if(!empty($filterdata['amount_to'])){
+				$data->where('finances.total_amount','<=',$filterdata['amount_to']);
+				$filtring = true;
+			}
+			if(!empty($filterdata['staff_name'])){
+				$data->where('finances.staff_name','Like','%'.$filterdata['staff_name'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['user_id'])){
+				$data->where('finances.user_id','=',$filterdata['user_id']);
+				$filtring = true;
+			}
+			if(!empty($filterdata['application_no'])){
+				$data->where('finances.application_no','=',$filterdata['application_no']);
+				$filtring = true;
+			}
+			 if(!empty($filterdata['chachees_number'])){
+				$data->where('finances.chachees_number','Like','%'.$filterdata['chachees_number'].'%');
+				$filtring = true;
+			}
+			if(!empty($filterdata['create_date'])&&!empty($filterdata['create_end'])){
+				$create_date=date('Y-m-d',strtotime($filterdata['create_date']));
+				$create_end=date('Y-m-d',strtotime($filterdata['create_end'].' + 1 day'));
+				$data->whereBetween('finances.created_at',[$create_date,$create_end]);
+				$filtring = true;
+			}
+			if(!empty($filterdata['search_on'])){
+				switch ($filterdata['search_on']) {
+					case "1":
+						$data->where('finances.remaining_amount','>',0);
+						$filtring = true;
+						break;
+					case "2":
+					   $data->where('finances.remaining_amount','=',0);
+					   $filtring = true;
+						break;
+					case "3":
+						$data->where('finances.amount','>',0);
+						$filtring = true;
+						break;
+					case "4":
+						$data->where(function ($query) {
+							$query->whereNull('finances.amount')
+							->orWhere('finances.amount','=','')
+							->orWhere('finances.amount','=',0);
+						});
+						$filtring = true;
+						break;
+					case "5":
+						$data->where('finances.fair_amount','=',0);
+						$filtring = true;
+						break;  
+				}
+			}
+			if(!empty($filterdata['s_date'])&&!empty($filterdata['e_date'])){
+				$data->whereBetween('finances.report_date',[strtotime($filterdata['s_date']),strtotime($filterdata['e_date'])]);
+				$filtring = true;
+			}
+		}
+		
+		//If nothing was search only search button pressed
+		if($filterdata){
+			if(!$filtring && empty($filterdata['mobile_data'])){
+				$data->where('finances.report_date','!=','');
+			}
+		}
+		
+		if($filtring){
+			if(empty($filterdata['mobile_data'])) {
+				$data->where('finances.report_date','!=','');
+			}
+			$data->orderBy('finances.report_date','asc');
+			$data->orderBy('finances.id','asc');
+		}else{
+			$data->orderBy('finances.created_at','desc');
+			$data->orderBy('finances.id','desc');
+		}
+		
+		return $data;
+	}
+	
+	
+	public function report_excel (Request $request) {
+		$filterdata = $request->all();
+		$data = $this->reportsFilterData($filterdata)->get();
+		if($data->isEmpty()){
+            return redirect()->back()->with('deleted','No Data For Export.');
+        }
+		$header = ['S.No.', 'Creation Date', 'Report Date', 'Inspection Date', 'Reference No', 'Application No', 'Staff', 'Created By', 'Valuation Initiated By', 'Financer Representative', 'Registration No', 'Make & Model', 'Finance Taken By', 'Place of Valuation', 'Total Amount', 'Received Amount', 'Remaining Amount'];
+		foreach ($data as $key => $value) {
+			$retRecords[$key]['s_no'] = (string)$key+1;
+			$retRecords[$key]['created_at'] = !empty($value->created_at) ? $value->created_at->format('d-m-Y') : '';
+			$retRecords[$key]['report_date'] = !empty($value->report_date) ? date('d-m-Y', (int)$value->report_date) : '';
+			$retRecords[$key]['inspection_date'] = !empty($value->inspection_date) ? $value->inspection_date : '';
+			$retRecords[$key]['reference_no'] = $value->reference_no;
+			$retRecords[$key]['application_no'] = $value->application_no;
+			$retRecords[$key]['staff_name'] = $value->staff_name;
+			$retRecords[$key]['created_by'] = $value->created_by;
+			$retRecords[$key]['name'] = $value->name;
+			$retRecords[$key]['financer_representative'] = $value->financer_representative;
+			$retRecords[$key]['registration_no'] = $value->registration_no;
+			$retRecords[$key]['make_model'] = $value->make_model;
+			$retRecords[$key]['financed_by'] = $value->financed_by;
+			$retRecords[$key]['place_of_valuation'] = $value->place_of_valuation;
+			$retRecords[$key]['total_amount'] = $value->total_amount;
+			$retRecords[$key]['amount_paid'] = $value->amount_paid;
+			$retRecords[$key]['remaining_amount'] = $value->remaining_amount;
+		}
+		if(!empty($filterdata['mobile_data'])) {
+			$nameOrTitle = 'Mobile Reports ';
+		}else if(!empty($filterdata['today_report'])) {
+			$nameOrTitle = 'Today\'s Reports ';
+		}else if(!empty($filterdata['duplicate_entry'])) {
+			$nameOrTitle = 'Duplicate Reports ';
+		}else if(!empty($filterdata['old_reports'])) {
+			$nameOrTitle = 'Old Reports ';
+		} else {
+			$nameOrTitle = 'Reports ';
+		}
+		if(!empty($filterdata['s_date']) && !empty($filterdata['e_date'])){
+			$nameOrTitle .= '(with Report Date From '.$filterdata['s_date'].' To '.$filterdata['e_date'].')';
+		}
+		//$nameOrTitle .= date('d-m-Y');
+		$cntHead = count($header)-1;
+		$cntRec = count($retRecords)+3;
+        $excel = new Export($retRecords, $header, date('d-m-Y'), $this->alphabet[$cntHead]);
+        $excel->setRowHeight([1 => 20]);
+        $excel->setFont(['A1:Z1265' =>'Arial']);
+        $excel->setFontSize(['A1' => 14]);
+        $excel->setBold(['A3:'.$this->alphabet[$cntHead].'3' => true]);
+        $excel->setBackground(['A3:'.$this->alphabet[$cntHead].'3' => '92D050']);
+        $excel->setMergeCells(['A1:'.$this->alphabet[$cntHead].'1', 'A2:'.$this->alphabet[$cntHead].'2']);
+        $excel->setCellValues(['A1' => $nameOrTitle]);
+		$excel->setBorders(['A3:'.$this->alphabet[$cntHead].$cntRec =>'#000000']);
+        return Excel::download($excel, $nameOrTitle.'.xlsx');
+	}
+	
+	
+	
+	
     /**
      * Display a listing of the resource.
      *
@@ -41,134 +236,11 @@ class FinanceController extends Controller
      */
     public function index(Request $request)
     {  
-
          if(\Request::route()->getName()=='report.index' && !$request->ajax()){
               $this->authorize('isSuper');
          }
          if ($request->ajax()) {
-             $data = Finance::select('finances.*','valuations.name','users.name as created_by')->leftJoin('valuations','finances.valuation_by','=','valuations.id')->leftJoin('users','finances.user_id','=','users.id');
-			$filtring = false;
-            if($request->filterdata){
-                $filterdata=$request->filterdata;
-                if(!empty($filterdata['mobile_data'])){
-                    $data->where('finances.mobile_data','=',1);
-                    $data->whereNull('finances.report_date');
-                }
-                if(!empty($filterdata['today_report'])){
-                      if(Auth()->user()->role==2){
-                         $data->where('finances.user_id','=',Auth()->user()->id);  
-                        }
-                    $data->whereNotNull('finances.report_date');    
-                    $data->whereDate('finances.created_at','=',date('Y-m-d'));
-					$filtring = true;
-                }
-                if(!empty($filterdata['duplicate_entry'])){
-                    $data->where('finances.duplicate_entry','=',1);
-					$filtring = true;
-                }
-                if(!empty($filterdata['valuation_by'])){
-                    $data->where('finances.valuation_by','=',$filterdata['valuation_by']);
-					$filtring = true;
-                }
-                if(!empty($filterdata['valuation_by'])){
-                    $data->where('finances.valuation_by','=',$filterdata['valuation_by']);
-					$filtring = true;
-                }
-                if(!empty($filterdata['financer_representative'])){
-                    $data->where('finances.financer_representative','Like','%'.$filterdata['financer_representative'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['make_model'])){
-                    //$data->where('finances.make_model','Like','%'.$filterdata['make_model'].'%');
-					$make_model_arr = explode(" ", $filterdata['make_model']);
-					foreach($make_model_arr as $mma) {
-						$data->where('finances.make_model','Like','%'.$mma.'%');
-					}
-					$filtring = true;
-                }
-                if(!empty($filterdata['registration_no'])){
-                    $data->where('finances.registration_no','Like','%'.$filterdata['registration_no'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['reference_no'])){
-                    $data->where('finances.reference_no','Like','%'.$filterdata['reference_no'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['financed_by'])){
-                    $data->where('finances.financed_by','Like','%'.$filterdata['financed_by'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['amount_from'])){
-                    $data->where('finances.total_amount','>=',$filterdata['amount_from']);
-					$filtring = true;
-                }
-                if(!empty($filterdata['amount_to'])){
-                    $data->where('finances.total_amount','<=',$filterdata['amount_to']);
-					$filtring = true;
-                }
-                if(!empty($filterdata['staff_name'])){
-                    $data->where('finances.staff_name','Like','%'.$filterdata['staff_name'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['user_id'])){
-                    $data->where('finances.user_id','=',$filterdata['user_id']);
-					$filtring = true;
-                }
-                if(!empty($filterdata['application_no'])){
-                    $data->where('finances.application_no','=',$filterdata['application_no']);
-					$filtring = true;
-                }
-                 if(!empty($filterdata['chachees_number'])){
-                    $data->where('finances.chachees_number','Like','%'.$filterdata['chachees_number'].'%');
-					$filtring = true;
-                }
-                if(!empty($filterdata['create_date'])&&!empty($filterdata['create_end'])){
-                    $create_date=date('Y-m-d',strtotime($filterdata['create_date']));
-                    $create_end=date('Y-m-d',strtotime($filterdata['create_end'].' + 1 day'));
-                    $data->whereBetween('finances.created_at',[$create_date,$create_end]);
-					$filtring = true;
-                }
-                if(!empty($filterdata['search_on'])){
-                        switch ($filterdata['search_on']) {
-                            case "1":
-                                $data->where('finances.remaining_amount','>',0);
-								$filtring = true;
-                                break;
-                            case "2":
-                               $data->where('finances.remaining_amount','=',0);
-							   $filtring = true;
-                                break;
-                            case "3":
-                                $data->where('finances.amount','>',0);
-								$filtring = true;
-                                break;
-                            case "4":
-								$data->where(function ($query) {
-									$query->whereNull('finances.amount')
-									->orWhere('finances.amount','=','')
-									->orWhere('finances.amount','=',0);
-								});
-								$filtring = true;
-                                break;
-                            case "5":
-                                $data->where('finances.fair_amount','=',0);
-								$filtring = true;
-                                break;  
-                        }
-                }
-                if(!empty($filterdata['s_date'])&&!empty($filterdata['e_date'])){
-                    $data->whereBetween('finances.report_date',[strtotime($filterdata['s_date']),strtotime($filterdata['e_date'])]);
-					$filtring = true;
-                }
-            }
-			//dd($filterdata);
-            if($filtring){
-				$data->where('finances.report_date','!=','');
-                $data->orderBy('finances.report_date','asc');
-            }else{
-				$data->orderBy('finances.report_date','desc');
-                //$data->orderBy('finances.id','desc');
-            }
+            $data = $this->reportsFilterData($request->filterdata);
             return Datatables::of($data)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
@@ -234,22 +306,27 @@ class FinanceController extends Controller
         $input['left_tyer_company']=json_encode(array_values(array_filter($request->left_tyer_company)));
         $input['left_quality']=json_encode(array_values(array_filter($request->left_quality)));
         $base64_image =$request->ch_upload;
+		
+		$optimizePath = '/finance/Report_images/'.date('Y').date('m');
+		if(!file_exists(public_path().$optimizePath)) {
+			mkdir(public_path().$optimizePath, 0777, true);
+		}		
         if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
             $data = substr($base64_image, strpos($base64_image, ',') + 1);
             $data = base64_decode($data);
             $extension = explode('/', mime_content_type($base64_image))[1];
             $name = str_replace(' ', '_', time().'.'.$extension);
-            $optimizePath = public_path().'/finance/';
-            file_put_contents($optimizePath.$name,$data);
+            //$optimizePath = public_path().'/finance/';
+            file_put_contents(public_path().$optimizePath.$name,$data);
             $input['chachees_number_photo']=$name;
         }
         if($request->file('uploadPhotos')){
             foreach($request->file('uploadPhotos') as $file){
                 $optimizeImage = Image::make($file);
-                $optimizePath = public_path().'/finance/';
+                //$optimizePath = public_path().'/finance/';
                 $name = str_replace(' ', '_', time().$file->getClientOriginalName());
-                $optimizeImage->save($optimizePath.$name,50);
-                $images[]=$name;
+                $optimizeImage->save(public_path().$optimizePath.$name,50);
+                $images[]=$optimizePath.$name;
             }
             $input['photo']=json_encode($images);
             $input['approve_photo']=json_encode($images); 
@@ -333,13 +410,17 @@ class FinanceController extends Controller
                         ->with('deleted','Unable to Make Pdf Without Photo.');
         }
         $base64_image =$request->ch_upload;
+		$optimizePath = '/finance/Report_images/'.date('Y').'/'.date('m').'/';
+		if(!file_exists(public_path().$optimizePath)) {
+			mkdir(public_path().$optimizePath, 0777, true);
+		}
         if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
             $data = substr($base64_image, strpos($base64_image, ',') + 1);
             $data = base64_decode($data);
             $extension = explode('/', mime_content_type($base64_image))[1];
             $name = str_replace(' ', '_',time().'.'.$extension);
-            $optimizePath = public_path().'/finance/';
-            file_put_contents($optimizePath.$name,$data);
+            //$optimizePath = public_path().'/finance/';
+            file_put_contents(public_path().$optimizePath.$name,$data);
             $input['chachees_number_photo']=$name;
         }
         if($request->approve_photo){
@@ -348,10 +429,10 @@ class FinanceController extends Controller
         if($request->file('uploadPhotos')){
             foreach($request->file('uploadPhotos') as $file){
                 $optimizeImage = Image::make($file);
-                $optimizePath = public_path().'/finance/';
+                //$optimizePath = public_path().'/finance/';
                 $name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
-                $optimizeImage->save($optimizePath.$name,50);
-                $images[]=$name;
+                $optimizeImage->save(public_path().$optimizePath.$name,50);
+                $images[]=$optimizePath.$name;
             }
             $input['photo']=json_encode($images);
             $input['approve_photo']=json_encode($images);
@@ -533,103 +614,103 @@ class FinanceController extends Controller
         }
        
     }
-    public function make_excel(Request $request){
+    
+	public function make_excel(Request $request){
         $validation=$request->validate([
             's_date' => 'required',
             'e_date'=>'required'
         ]);
         $request['filterdata']=$request->all();
-        $header=Header::first()->toArray();
+        $header=Header::first();
         $data = Finance::select('finances.*','valuations.name','valuations.address')->leftJoin('valuations','finances.valuation_by','=','valuations.id');
         $valu_by=false;
-            if($request->filterdata){
-                $filterdata=$request->filterdata;
-				$excelPage = 'old';
-                if(!empty($filterdata['mobile_data'])){
-                    $data->where('finances.mobile_data','=',1);
-					$excelPage = 'mobile';
-                }
-                if(!empty($filterdata['today_report'])){
-                    $data->where('finances.created_at','=',date($filterdata['today_report']));
-					$excelPage = 'today';
-                }
-                if(!empty($filterdata['duplicate_entry'])){
-                    $data->where('finances.duplicate_entry','=',1);
-                }
-                if(!empty($filterdata['valuation_by'])){
-                    $data->where('finances.valuation_by','=',$filterdata['valuation_by']);
-                    $valu_by=true;
-                }
-                if(!empty($filterdata['financer_representative'])){
-                    $data->where('finances.financer_representative','Like','%'.$filterdata['financer_representative'].'%');
-                }
-                if(!empty($filterdata['make_model'])){
-                    $data->where('finances.make_model','Like','%'.$filterdata['make_model'].'%');
-                }
-                if(!empty($filterdata['registration_no'])){
-                    $data->where('finances.registration_no','Like','%'.$filterdata['registration_no'].'%');
-                }
-                if(!empty($filterdata['reference_no'])){
-                    $data->where('finances.reference_no','Like','%'.$filterdata['reference_no'].'%');
-                }
-                if(!empty($filterdata['financed_by'])){
-                    $data->where('finances.financed_by','Like','%'.$filterdata['financed_by'].'%');
-                }
-                if(!empty($filterdata['amount_from'])){
-                    $data->where('finances.total_amount','>=',$filterdata['amount_from']);
-                }
-                if(!empty($filterdata['amount_to'])){
-                    $data->where('finances.total_amount','<=',$filterdata['amount_to']);
-                }
-                if(!empty($filterdata['staff_name'])){
-                    $data->where('finances.staff_name','Like','%'.$filterdata['staff_name'].'%');
-                }
-                if(!empty($filterdata['user_id'])){
-                    $data->where('finances.user_id','=',$filterdata['user_id']);
-                }
-                if(!empty($filterdata['application_no'])){
-                    $data->where('finances.application_no','=',$filterdata['application_no']);
-                }
-                if(!empty($filterdata['create_date'])&&!empty($filterdata['create_end'])){
-                    $create_date=date('Y-m-d',strtotime($filterdata['create_date']));
-                    $create_end=date('Y-m-d',strtotime($filterdata['create_end']));
-                    $data->whereBetween('finances.created_at',[$create_date,$create_end]);
-                }
-                if(!empty($filterdata['s_date'])&&!empty($filterdata['e_date'])){
-                    $data->whereBetween('finances.report_date',[strtotime($filterdata['s_date']),strtotime($filterdata['e_date'])]);
-                     $d1 = $filterdata['s_date'];
-                     $d2= $filterdata['e_date'];
-                }
-                if(!empty($filterdata['search_on'])){
-                        switch ($filterdata['search_on']) {
-                            case "1":
-                                $data->where('finances.remaining_amount','>=',1);
-                                break;
-                            case "2":
-                               $data->where('finances.remaining_amount','>=',0);
-                                break;
-                            case "3":
-                                $data->where('finances.amount','>',0);
-                                break;
-                            case "4":
-                                $data->whereNull('finances.amount');
-                                $data->where('finances.amount','=','');
-                                break;
-                            case "5":
-                                $data->where('finances.fair_amount','=',0);
-                                break;  
-                        }
-                }
-                $data = $data->orderBy('report_date')->get()->toArray();
-				//$sql = Str::replaceArray('?', $data->getBindings(), $data->toSql()); dd($sql);
-				//echo '<pre>'; print_r($data); die;
-				$result=$this->generate_excel($data, $d1, $d2, $header, $valu_by, $excelPage);
-                if($result==true){
-                  return back()->with('add', 'Grid Excel has been Generated');
-                } 
-            }
+		if($request->filterdata){
+			$filterdata=$request->filterdata;
+			if(!empty($filterdata['mobile_data'])){
+				$data=$data->where('finances.mobile_data','=',1);
+			}
+			if(!empty($filterdata['today_report'])){
+				$data=$data->where('finances.created_at','=',date($filterdata['today_report']));
+			}
+			if(!empty($filterdata['duplicate_entry'])){
+				$data=$data->where('finances.duplicate_entry','=',1);
+			}
+			if(!empty($filterdata['valuation_by'])){
+				$data=$data->where('finances.valuation_by','=',$filterdata['valuation_by']);
+			}
+			if(!empty($filterdata['valuation_by'])){
+				$data=$data->where('finances.valuation_by','=',$filterdata['valuation_by']);
+				$valu_by=true;
+			}
+			if(!empty($filterdata['financer_representative'])){
+				$data=$data->where('finances.financer_representative','Like','%'.$filterdata['financer_representative'].'%');
+			}
+			if(!empty($filterdata['make_model'])){
+				$data=$data->where('finances.make_model','Like','%'.$filterdata['make_model'].'%');
+			}
+			if(!empty($filterdata['registration_no'])){
+				$data=$data->where('finances.registration_no','Like','%'.$filterdata['registration_no'].'%');
+			}
+			if(!empty($filterdata['reference_no'])){
+				$data=$data->where('finances.reference_no','Like','%'.$filterdata['reference_no'].'%');
+			}
+			if(!empty($filterdata['financed_by'])){
+				$data=$data->where('finances.financed_by','Like','%'.$filterdata['financed_by'].'%');
+			}
+			if(!empty($filterdata['amount_from'])){
+				$data=$data->where('finances.total_amount','>=',$filterdata['amount_from']);
+			}
+			if(!empty($filterdata['amount_to'])){
+				$data=$data->where('finances.total_amount','<=',$filterdata['amount_to']);
+			}
+			if(!empty($filterdata['staff_name'])){
+				$data=$data->where('finances.staff_name','Like','%'.$filterdata['staff_name'].'%');
+			}
+			if(!empty($filterdata['user_id'])){
+				$data=$data->where('finances.user_id','=',$filterdata['user_id']);
+			}
+			if(!empty($filterdata['application_no'])){
+				$data=$data->where('finances.application_no','=',$filterdata['application_no']);
+			}
+			if(!empty($filterdata['create_date'])&&!empty($filterdata['create_end'])){
+				$create_date=date('Y-m-d',strtotime($filterdata['create_date']));
+				$create_end=date('Y-m-d',strtotime($filterdata['create_end']));
+				$data=$data->whereBetween('finances.created_at',[$create_date,$create_end]);
+			}
+			if(!empty($filterdata['s_date'])&&!empty($filterdata['e_date'])){
+				$data=$data->whereBetween('finances.report_date',[strtotime($filterdata['s_date']),strtotime($filterdata['e_date'])]);
+				 $d1 = $filterdata['s_date'];
+				 $d2= $filterdata['e_date'];
+			}
+			if(!empty($filterdata['search_on'])){
+					switch ($filterdata['search_on']) {
+						case "1":
+							$data=$data->where('finances.remaining_amount','>=',1);
+							break;
+						case "2":
+						   $data=$data->where('finances.remaining_amount','>=',0);
+							break;
+						case "3":
+							$data=$data->where('finances.amount','>',0);
+							break;
+						case "4":
+							$data=$data->whereNull('finances.amount');
+							$data=$data->where('finances.amount','=','');
+							break;
+						case "5":
+							$data=$data->where('finances.fair_amount','=',0);
+							break;  
+					}
+			}
+			$data=$data->orderBy('report_date')->get();
+			$result=$this->generate_excel($data,$d1,$d2,$header,$valu_by);
+			if($result==true){
+			  return back()->with('add', 'Grid Excel has been Generated');
+			} 
+		}
         return back()->with('deleted', 'Somthing went wrong');
     }
+	
     public function image_reorder(Request $request){
         if($request->ajax()){
              $input['photo']=json_encode($request->imageids_arr);
@@ -753,10 +834,11 @@ class FinanceController extends Controller
              return $arr = array('status' => false,'action'=>'add','msg'=>'Somthing Went Wrong');    
         }
     }
-    private function generate_excel($rows, $d1, $d2, $header, $valu_by, $excelPage){
+	
+    private function generate_excel($rows,$d1,$d2,$header,$valu_by){
       $valuation_by=' - ';
       if($valu_by){
-        $valuation_by=$rows[0]['name'];
+        $valuation_by=$rows[0]->name;  
       }
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
@@ -770,7 +852,8 @@ class FinanceController extends Controller
          
         // NEW WORKSHEET
         $sheet = $spreadsheet->getActiveSheet();
-		$sheet->setTitle('Invoice  '.date('F-Y',strtoTime($d1)));
+
+        $sheet->setTitle('Invoice  '.date('F-Y',strtoTime($d1)));
         $sheet->mergeCells('A1:I1');
         $objRichText = new RichText();
         $run1 = $objRichText->createTextRun($header['authorizer_name']);
@@ -816,7 +899,7 @@ class FinanceController extends Controller
          'alignment' => array(
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                 ));
-		$sheet->setCellValue('A4', '('.$d1.' To '.$d2.')');
+        $sheet->setCellValue('A4', '('.$d1.' To '.$d2.')');
         $sheet->getStyle('A4')->applyFromArray($styleArray);
 
         $styleArray = array(
@@ -829,7 +912,6 @@ class FinanceController extends Controller
                 ));
 
         $sheet->mergeCells('A5:I5');
-		//echo '<pre>'; print_r($header); die;
         $sheet->setCellValue('A5','EMAIL:'.$header["email1"].'                '.$header["email2"].''.'                MOBILE NO : '.$header["mobile_number"]);
         $sheet->getStyle('A5')->applyFromArray($styleArray);
         $sheet->mergeCells('A6:I6');
@@ -885,7 +967,7 @@ class FinanceController extends Controller
         $j=1;
         $total=0;
         foreach ($rows  as $key => $value) {
-//echo '<pre>'; print_r($value); die;
+
             $sheet->getRowDimension($i)->setRowHeight(50);
             $sheet->setCellValue('A'.$i,$j);
             $sheet->setCellValue('B'.$i, date('d-m-Y', (int)$value['report_date']));
@@ -945,18 +1027,11 @@ class FinanceController extends Controller
             $sheet->getStyle('H'.$i)->applyFromArray($styleArray);
             $sheet->getStyle('I'.$i)->applyFromArray($styleArray);
         }
-		if($excelPage == 'mobile') {
-			$name = 'Mobile reports from - to'.'.xlsx';
-		} else if($excelPage == 'today') {
-			$name = 'Today\'s reports '.date('d-m-Y').'.xlsx';
-		} else {
-			$name = 'Old reports from - to'.'.xlsx'; //to do report date or creation date
-		}
         if(!$valu_by){
-            $writer = new Xlsx($spreadsheet);
+               $writer = new Xlsx($spreadsheet);
 
-            $date=date_create($d1);
-              //$name= date_format($date,"M Y").'.xlsx';
+              $date=date_create($d1);
+              $name= date_format($date,"M Y").'.xlsx';
 
               header('Content-type: application/vnd.xlsx');
               header('Content-Disposition: attachment; filename="'.$name.'"');
@@ -1023,7 +1098,7 @@ class FinanceController extends Controller
             )));
         $sheet->getStyle('A9')->getFont()->setUnderline(true);
         $sheet->mergeCells('A10:K10');
-        $sheet->setCellValue('A10',$rows[0]['address']);
+        $sheet->setCellValue('A10',$rows[0]->address);
         $sheet->getRowDimension('10')->setRowHeight(40);
         $sheet->mergeCells('A12:K12');
         $sheet->setCellValue('A12','Subject:- Invoice for valuation of vehicles conducted in '.date('F Y',strtotime($d1)));
@@ -1035,7 +1110,7 @@ class FinanceController extends Controller
         
         $objRichText->createText('Please find the attached invoice for the ');
 
-        $objBold = $objRichText->createTextRun(count($rows).' valuations and inspections of vehicles ');
+        $objBold = $objRichText->createTextRun($rows->count().' valuations and inspections of vehicles ');
         $objBold->getFont()->setBold(true);
 
         $objRichText->createText('conducted in the month of ');
@@ -1088,15 +1163,15 @@ class FinanceController extends Controller
         $writer = new Xlsx($spreadsheet);
 
         $date=date_create($d1);
-        //$name= date_format($date,"F_Y").'.xlsx';
+        $name= date_format($date,"F_Y").'.xlsx';
         header('Content-type: application/vnd.xlsx');
         header('Content-Disposition: attachment; filename="'.$name.'"');
 		//ob_end_clean();
         $writer->save('php://output');
 		exit;
-        return true;
-
+		return true;
     }
+	
     public function generate_pdf($id){
         $data = Finance::select('finances.*','valuations.name as valuationsname','declarations.note')->leftJoin('valuations','finances.valuation_by','=','valuations.id')->leftJoin('declarations','finances.notice','=','declarations.id')->where('finances.id','=',$id)->first();
         if(!$data){
@@ -1618,44 +1693,7 @@ class FinanceController extends Controller
      */
     public function today_report_excel()
     {
-		$records=Finance::select('finances.*','valuations.name','users.name as created_by')->leftJoin('valuations','finances.valuation_by','=','valuations.id')->leftJoin('users','finances.user_id','=','users.id')->whereNotNull('finances.report_date')->whereDate('finances.created_at','=',date('Y-m-d'))->get();
-        if($records->isEmpty()){
-            return redirect()->back()->with('deleted','No Data For Export.');
-        }
 		
-		$A1 = 'AUTOSWIFT FINVALE (AFV)';
-		$K1 = 'EFFECTIVE FROM '.date('d-m-Y');
-		$header = ['S.No.', 'Creation Date', 'Report Date', 'Inspection Date', 'Reference No', 'Application No', 'Staff', 'Created By', 'Valuation Initiated By', 'Financer Representative', 'Registration No', 'Make & Model', 'Finance Taken By', 'Place of Valuation', 'Total Amount', 'Received Amount', 'Remaining Amount'];
-		foreach ($records as $key => $value) {
-			$retRecords[$key]['s_no'] = (string)$key+1;
-			$retRecords[$key]['created_at'] = $value->created_at->format('d-m-Y');
-			$retRecords[$key]['report_date'] = date('d-m-Y', (int)$value->report_date);
-			$retRecords[$key]['inspection_date'] = $value->inspection_date;
-			$retRecords[$key]['reference_no'] = $value->reference_no;
-			$retRecords[$key]['application_no'] = $value->application_no;
-			$retRecords[$key]['staff_name'] = $value->staff_name;
-			$retRecords[$key]['created_by'] = $value->created_by;
-			$retRecords[$key]['name'] = $value->name;
-			$retRecords[$key]['financer_representative'] = $value->financer_representative;
-			$retRecords[$key]['registration_no'] = $value->registration_no;
-			$retRecords[$key]['make_model'] = $value->make_model;
-			$retRecords[$key]['financed_by'] = $value->financed_by;
-			$retRecords[$key]['place_of_valuation'] = $value->place_of_valuation;
-			$retRecords[$key]['total_amount'] = $value->total_amount;
-			$retRecords[$key]['amount_paid'] = $value->amount_paid;
-			$retRecords[$key]['remaining_amount'] = $value->remaining_amount;
-		}	
-		$nameOrTitle='Today\'s Reports '.date('d-m-Y');
-		$cntHead = count($header)-1;
-        $excel = new Export($retRecords, $header, date('d-m-Y'), $this->alphabet[$cntHead]);
-        $excel->setRowHeight([1 => 20]);
-        $excel->setFont(['A1:Z1265' =>'Arial']);
-        $excel->setFontSize(['A1' => 14]);
-        $excel->setBold(['A1:'.$this->alphabet[$cntHead].'1' => true]);
-        $excel->setBackground(['A2:'.$this->alphabet[$cntHead].'2' => '92D050']);
-        $excel->setMergeCells(['A1:'.$this->alphabet[$cntHead].'1']);
-        $excel->setCellValues(['A1' => $nameOrTitle]);
-        return Excel::download($excel, $nameOrTitle.'.xlsx');
     }
     
     public function get_duplicate(Request $request){

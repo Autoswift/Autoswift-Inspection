@@ -1207,7 +1207,7 @@
                         @endphp
                         @if($photo)
                            @foreach($photo as $key=>$item)
-                        <li class="ui-state-default image{{$key}}" id="image_{{$item}}"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$item}}","{{$key}}")>Remove</a></li><li><a href="#" onclick=rotate("{{$item}}","right")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$item}}","left")><i class="fa fa-rotate-left"></i></a></li></ul></div><img src="{{env('APP_URL')}}/finance/{{$item}}" title="{{$item}}" ><div style="text-align: center;"><input type="checkbox" name="approve_photo[]" class="approve-check" value="{{$item}}" @if(in_array($item,$approve_photo)) checked @endif></div>
+                        <li class="ui-state-default image{{$key}}" id="image_{{$item}}"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$item}}","{{$key}}")>Remove</a></li><li><a href="#" onclick=rotate("{{$item}}","right")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$item}}","left")><i class="fa fa-rotate-left"></i></a></li></ul></div><img src="{{asset($item)}}" title="{{$item}}" ><div style="text-align: center;"><input type="checkbox" name="approve_photo[]" class="approve-check" value="{{$item}}" @if(in_array($item,$approve_photo)) checked @endif></div>
                         </li>
                            @endforeach
                         @endif
