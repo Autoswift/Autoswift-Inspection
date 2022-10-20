@@ -239,6 +239,94 @@ class ApiController extends BaseController
        
         return $this->sendResponse($profile,'Profile retrieved successfully.');
     }
+	
+	public function addfiles_report(Request $request){
+		$validator = Validator::make($request->all(), [
+			'report_id'=>'required|exists:finances,id',
+		]);
+		if(isset($validator) && $validator->fails()){
+			return $this->sendError('Validation Error.', $validator->errors());       
+		}  
+        $input=array();
+		$update=Finance::findOrFail($request->report_id);
+		if($request->file('uploadPhotos')){
+			$optimizeImagePath = config('global.report_main_folder').$update->id.config('global.report_photos');
+			if(!file_exists(public_path().$optimizeImagePath)) {
+				mkdir(public_path().$optimizeImagePath, 0777, true);
+			}
+            foreach($request->file('uploadPhotos') as $fileKey => $file){
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+				$images[$fileKey] = uploadDocs($file, $optimizeImagePath, null, $filename);
+                /*$optimizeImage = Image::make($file);
+                $name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+                $optimizeImage->save(public_path().$optimizeImagePath.$name,50);
+                $images[$fileKey]=$optimizeImagePath.$name;*/
+            }
+            $input['photo']=json_encode($images);
+            //$input['approve_photo']=json_encode($images);
+            if(!empty($update['photo'])){
+                $p=json_decode($update['photo']);
+                $input['photo']=json_encode(array_merge($p,$images));  
+                //$ap=json_decode($update['approve_photo']);
+                //$input['approve_photo']=json_encode(array_merge($ap,$images));  
+            }   
+        }
+		
+		$optimizeVideoPath = config('global.report_main_folder').$update->id.config('global.report_videos');
+		if($request->file('uploadVideos')){
+			if(!empty($update['videos'])){
+                $videos = json_decode($update['videos'], 1);
+			}
+            foreach($request->file('uploadVideos') as $fileKey=>$file){
+				$name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+                $file->move(public_path().$optimizeVideoPath, $name);
+				if(!empty($videos[$fileKey]) && \File::exists(public_path().$videos[$fileKey])) {
+                    \File::delete(public_path().$videos[$fileKey]);
+				}
+                $videos[$fileKey]=$optimizeVideoPath.$name;
+            }
+            $input['videos']=json_encode($videos);
+        }
+        /*if($request->file()){
+			$optimizePath = config('global.report_main_folder').$newReport->id.config('global.report_photos');
+			if(!file_exists(public_path().$optimizePath)) {
+				mkdir(public_path().$optimizePath, 0777, true);
+			}
+            foreach($request->file() as $key => $file){
+                if($key!='video1' && $key!='video2'){
+                    $optimizeImage = Image::make($file);
+                    $optimizePath = public_path().'/finance/';
+                    $name = str_replace(' ', '_', time().Str::random(15).'.'.$file->extension());
+                    $optimizeImage->save($optimizePath.$name,50);
+                    if($key=='chassis_photo'){
+                        $input_data['chachees_number_photo']=$name;
+                    }
+                    elseif($key=='selfie'){
+                        $input_data['selfie']=$name;
+                        $images[]=$name;
+                    }else{
+                        $images[]=$name;
+                    }
+                }elseif($key=='video1' || $key=='video2'){
+                    $filename1 = str_replace(' ', '_', time().$file->getClientOriginalName());
+                    $path1= public_path().'/videos/';
+                    $file->move($path1, $filename1);
+                    $videos[]=$filename1;
+                }
+            }
+            if(!empty($images)){
+                $input_data['photo']=json_encode($images); 
+            }
+            if(!empty($videos)){
+                $input_data['videos']=json_encode($videos); 
+            }
+        }*/
+        if($update->update($input)) {
+            return $this->sendResponse($input,'Report Submited successfully.');
+        }     
+        return $this->sendResponse([],'Somthing Went wrong.');
+    }
+	
     public function submit_report(Request $request){
          if(!$request->confirm && $request->application_no!='-'){
             $validator = Validator::make($request->all(), [

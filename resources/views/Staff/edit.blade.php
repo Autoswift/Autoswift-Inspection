@@ -55,6 +55,15 @@
          </div>
           <div class="col-lg-12">                 
             <div class="form-group" style="overflow: hidden;">
+               {!! Form::label('staff_email', 'Email',['class' => 'col-md-2']) !!}
+               <div class="col-md-6">
+                  {!! Form::text('staff_email', null, ['class' => 'form-control col-md-6']) !!}
+                  <div class="error-message"> {{ $errors->first('staff_email') }}</div>
+               </div>
+            </div>
+         </div>
+          <div class="col-lg-12">                 
+            <div class="form-group" style="overflow: hidden;">
                {!! Form::label('sort_name', 'Sort Name*',['class' => 'col-md-2']) !!}
                <div class="col-md-6">
                   {!! Form::text('sort_name', null, ['class' => 'form-control col-md-6']) !!}
@@ -62,25 +71,9 @@
                </div>
             </div>
          </div>
-          <div class="col-lg-12"> 
-         <div class="form-group" style="overflow: hidden;">
-                {!! Form::label('photo', 'Photo',['class' => 'col-md-2']) !!}
-               <div class="col-md-2">
-                    {!! Form::file('photo', ['class' => 'input-file', 'id'=>'photo']) !!}
-                  <div class="error-message"> {{ $errors->first('photo') }}</div>
-               </div>
-               <div class="col-lg-2">
-                @if($staff->photo) 
-                  <img src="{{asset('document/'.$staff->photo)}}" style="max-width: 100px;max-height:100px">
-                @endif  
-                </div>
-               <lable class="col-md-1" style="font-weight: 600;">Status</lable>
-             <label class="switch">
-               <input type="checkbox" name="status" {{$staff->status?'checked':''}}>
-               <span class="slider round"></span>
-            </label>
-         </div>
-      </div>
+			<div class="col-lg-12"> 
+				@include('User.user_documents_common', ['users' => $staff])
+			</div>
       
          <!-- <div class="input submit">
             <div class="submit"><input class="btn btn-default" style="width:100px;font-weight:bold;margin-left:195px" type="submit" ></div>

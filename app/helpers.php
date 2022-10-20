@@ -51,7 +51,7 @@
     
     $Rupees = implode(' ', array_reverse($str));
     $paise = ($decimal) ? "And Paise " . ($words[$decimal - $decimal%10]) ." " .($words[$decimal%10])  : '';
-    return ($Rupees ? 'Rupees ' . $Rupees : '') . $paise . " Only";
+    return ($Rupees ? 'Rupees ' . $Rupees : '') . $paise . "Only";
 }
 function push_notification($firebaseToken,$title,$body)
     {
@@ -79,4 +79,20 @@ function push_notification($firebaseToken,$title,$body)
         $response = curl_exec($ch);
         //dd($response); 
     }
+	
+	
+	function uploadDocs($file, $optimizePath, $previousImage = null, $filename = null) {
+		$optimizeImage = Image::make($file);
+		if(empty($filename)) {
+			$filename = time().$file->getClientOriginalName();
+		}
+		if($optimizeImage->save(public_path().$optimizePath.$filename, 72)) {
+			if(!empty($previousImage) && file_exists(public_path().$previousImage)) {
+				unlink(public_path().$previousImage);
+			}
+			return $optimizePath.$filename;
+		} else {
+			return '';
+		}
+	}
 ?>

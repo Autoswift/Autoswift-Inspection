@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Artisan;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 Route::get('/clear-cache', function() {
 	Artisan::call('cache:clear');
 	Artisan::call('optimize:clear');
@@ -68,6 +69,8 @@ Route::group(['middleware' => ['auth']], function () {
 	});
 	Route::group(['middleware' => ['auth','can:isWeb']], function () {
 		Route::resource('users','UserController');
+		Route::get('users/create/{role_id}','UserController@create')->name('create');
+		//Route::get('users/{role}','UserController@show')->name('show');
 		Route::resource('user_notification','UserNotificationController');
 		Route::resource('company_notification','CompanyNotificationController');
 		Route::match(['get','post'],'/profile','UserController@profile')->name('profile');
@@ -88,8 +91,10 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::get('users/{role}/{status?}','UserController@users')->name('userfill');
 		Route::post('users/image','UserController@image')->name('updateimage');
 		Route::post('/changerefer','UserController@changereferno')->name('changereferno');
+		Route::post('/changerolerefer','UserController@changerolereferno')->name('changerolereferno');
 		Route::post('documents','UserController@documents')->name('document');
-		Route::post('statuschange','UserController@change_status')->name('statuschange');	
+		Route::post('statuschange','UserController@change_status')->name('statuschange');
+		Route::get('make_users_zip/{id?}','UserController@make_users_zip')->name('make_users_zip');		
 		Route::get('getstatearea','AreaController@getstatearea');
 		Route::resource('staff','StaffController');
 		Route::post('get_grid_pdf','ValuationController@get_grid_pdf')->name('get_grid_pdf');

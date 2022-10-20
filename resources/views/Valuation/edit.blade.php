@@ -37,6 +37,13 @@
                </div>
             </div>
             <div class="form-group" style="overflow: hidden;">
+               {!! Form::label('short_name', 'Initials*',['class' => 'col-md-2']) !!}
+               <div class="col-md-6">
+                  {!! Form::text('short_name', null, ['class' => 'form-control col-md-6']) !!}
+                  <div class="error-message"> {{ $errors->first('short_name') }}</div>
+               </div>
+            </div>
+            <div class="form-group" style="overflow: hidden;">
                {!! Form::label('address', 'Address',['class' => 'col-md-2']) !!}
                <div class="col-md-6">
                   {!! Form::text('address', null, ['class' => 'form-control col-md-6']) !!}

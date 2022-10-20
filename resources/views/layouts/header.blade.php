@@ -258,6 +258,9 @@
                      <li class="{{ !$role && $controllerName=='UserController' ? 'active' : '' }}">
                         <a href="{{route('users.index')}}">Total Employees</a>                            
                      </li>
+                     <li  class="{{ $role=='super_admin'? 'active' : '' }}">
+                        <a href="{{route('users.index')}}/super_admin/all">Super Admins</a>                            
+                     </li>
                      <li  class="{{ $role=='web_admin'? 'active' : '' }}">
                         <a href="{{route('users.index')}}/web_admin/all">Web Admins (P)</a>                            
                      </li>

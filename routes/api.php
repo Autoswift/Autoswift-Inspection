@@ -23,6 +23,7 @@ Route::middleware('auth:api')->group( function () {
     Route::get('get_area','API\ApiController@get_area');
     Route::get('getcompany_area','API\ApiController@getcompany_area');
     Route::post('submit_report','API\ApiController@submit_report');
+    Route::post('addfiles_report','API\ApiController@addfiles_report');
     Route::match(['get','post'],'profile','API\ApiController@profile');
    
 });

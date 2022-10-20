@@ -40,22 +40,26 @@ class StaffController extends Controller
             'name' => 'required',
             'mobile_number' => 'required',
             'address' => 'required',
-            'sort_name' => 'required',
+            'sort_name' => 'required|string|unique:staffs,sort_name',
         ]);
-         $input = $request->all();
-         $input['status']=$request->status?1:0;
-        if($request->file('photo')!=null){
-            $file = $request->file('photo');
-            $optimizeImage = Image::make($file);
-            $optimizePath = public_path().'/document/';
-            $name = time().'.'.$file->getClientOriginalExtension();
-            $optimizeImage->save($optimizePath.$name, 72);
-            $input['photo'] = $name;
+        $input = $request->all();
+		$newStaff = Staff::create();
+		$optimizePath = config('global.staffs_main_folder').$newStaff->id.'/';
+		if(!file_exists(public_path().$optimizePath)) {
+			mkdir(public_path().$optimizePath, 0777, true);
+		}
+        if($file = $request->file('icard')) {
+			$input['icard'] = uploadDocs($file, $optimizePath);
+		}
+        if($file = $request->file('govt_issue_id')) {        
+            $input['govt_issue_id'] = uploadDocs($file, $optimizePath);
+        }   
+        if($file = $request->file('back_govt_card')) {        
+            $input['back_govt_card'] = uploadDocs($file, $optimizePath);
         }
-        $data = Staff::create($input);
-        $data->save();
-        return redirect()->route('staff.index')
-                        ->with('added','Staff Created Successfully.');
+        $data = $newStaff->update($input);
+        //$data->save();
+        return redirect()->route('staff.index')->with('added','Staff Created Successfully.');
     }
 
     /**
@@ -95,17 +99,21 @@ class StaffController extends Controller
             'name' => 'required',
             'mobile_number' => 'required',
             'address' => 'required',
-            'sort_name' => 'required',
+            'sort_name' => 'required|string|unique:staffs,sort_name,'.$staff->id,
         ]);
-         $input = $request->all();
-         $input['status']=$request->status?1:0;
-        if($request->file('photo')!=null){
-            $file = $request->file('photo');
-            $optimizeImage = Image::make($file);
-            $optimizePath = public_path().'/document/';
-            $name = time().'.'.$file->getClientOriginalExtension();
-            $optimizeImage->save($optimizePath.$name, 72);
-            $input['photo'] = $name;
+        $input = $request->all();
+		$optimizePath = config('global.staffs_main_folder').$staff->id.'/';
+		if(!file_exists(public_path().$optimizePath)) {
+			mkdir(public_path().$optimizePath, 0777, true);
+		}        
+		if($file = $request->file('icard')) {
+			$input['icard'] = uploadDocs($file, $optimizePath, $staff->icard);
+		}
+        if($file = $request->file('govt_issue_id')) {        
+            $input['govt_issue_id'] = uploadDocs($file, $optimizePath, $staff->govt_issue_id);
+        }   
+        if($file = $request->file('back_govt_card')) {        
+            $input['back_govt_card'] = uploadDocs($file, $optimizePath, $staff->back_govt_card);
         }
         $data = Staff::findOrFail($staff->id);
         $data->update($input);

@@ -51,11 +51,9 @@ class FinanceController extends Controller
 				}
 				$data->whereNotNull('finances.report_date');    
 				$data->whereDate('finances.created_at','=',date('Y-m-d'));
-				$filtring = true;
 			}
 			if(!empty($filterdata['duplicate_entry'])){
 				$data->where('finances.duplicate_entry','=',1);
-				$filtring = true;
 			}
 			if(!empty($filterdata['valuation_by'])){
 				$data->where('finances.valuation_by','=',$filterdata['valuation_by']);
@@ -166,13 +164,37 @@ class FinanceController extends Controller
 			$data->orderBy('finances.created_at','desc');
 			$data->orderBy('finances.id','desc');
 		}
-		
 		return $data;
 	}
 	
 	
 	public function report_excel (Request $request) {
 		$filterdata = $request->all();
+		$validated = false;
+		if((!empty($filterdata['s_date']) && !empty($filterdata['e_date'])) || (!empty($filterdata['create_date']) && !empty($filterdata['create_end']))){
+			$validated = true;
+		}
+		$validationArr = [
+			's_date' => 'required',
+			'e_date' => 'required'
+		];
+		if((empty($filterdata['create_date']) && !empty($filterdata['create_end'])) || (!empty($filterdata['create_date']) && empty($filterdata['create_end']))) {
+			$validationArr = [
+				'create_date' => 'required',
+				'create_end' => 'required'
+			];
+		}
+		
+		if(!$validated) {
+			$validation=$request->validate(
+			$validationArr,
+			[
+				's_date.required' => 'Please choose bill date or creation date from!',
+				'e_date.required' => 'Please choose bill date or creation date to!',
+				'create_date.required' => 'Please choose bill date or creation date from!',
+				'create_end.required' => 'Please choose bill date or creation date to!'
+			]);
+		}
 		$data = $this->reportsFilterData($filterdata)->get();
 		if($data->isEmpty()){
             return redirect()->back()->with('deleted','No Data For Export.');
@@ -252,6 +274,9 @@ class FinanceController extends Controller
                                 if($row['pdf_file']){
                                    $btn.='<a href="'.env('APP_URL').'/finance/pdf/'.$row['pdf_file'].'" title="pdf"><i class="fa fa-file-pdf-o"></i></a>';
                                 }
+								if(!empty($row['videos'])){
+                                   $btn.='<i class="fa fa-video-camera" style="color: #337ab7;"></i>';
+                                }
                             return $btn;
                     })->addColumn('report_date', function($row){
                         if($row->report_date!='' && $row->report_date!=Null){
@@ -267,7 +292,7 @@ class FinanceController extends Controller
                     ->make(true);
         
         }
-      $valuatation = Valuation::orderBy('position')->pluck('name','id');
+      $valuatation = Valuation::orderBy('name')->pluck('name','id');
       $user['SuperAdmin']= User::where('role','=',1)->orderBy('name','asc')->pluck('name','id');
       $user['WebAdmin']= User::where('role','=',2)->orderBy('name','asc')->pluck('name','id'); 
       return view('Reports.index',compact('valuatation','user'));
@@ -283,7 +308,7 @@ class FinanceController extends Controller
         $grid=Grid::orderBy('vehicle_make','asc')->orderBy('vehicle_model','asc')->orderBy('variant','asc')->orderBy('year','asc')->get();
         $vehicle_make=Grid::select('vehicle_make')->groupBy('vehicle_make')->orderBy('vehicle_make')->pluck('vehicle_make','vehicle_make');
         $reference_no = Auth()->user()->employee_id.'-'.Auth()->user()->ref_start;
-        $company = Valuation::orderBy('position')->pluck('name','id');
+        $company = Valuation::orderBy('name')->pluck('name','id');
         $staff=Staff::orderBy('position')->where('status','=',1)->pluck('name','id');
         $declaration=Declaration::orderBy('position')->pluck('note','id');
         return view('Reports.create',compact('company','staff','declaration','reference_no','grid','vehicle_make'));
@@ -307,7 +332,9 @@ class FinanceController extends Controller
         $input['left_quality']=json_encode(array_values(array_filter($request->left_quality)));
         $base64_image =$request->ch_upload;
 		
-		$optimizePath = '/finance/Report_images/'.date('Y').date('m');
+		//Create new report here
+		$newReport = Finance::create(['duplicate_entry' => 0]);
+		$optimizePath = config('global.report_main_folder').$newReport->id.config('global.report_photos');
 		if(!file_exists(public_path().$optimizePath)) {
 			mkdir(public_path().$optimizePath, 0777, true);
 		}		
@@ -318,7 +345,7 @@ class FinanceController extends Controller
             $name = str_replace(' ', '_', time().'.'.$extension);
             //$optimizePath = public_path().'/finance/';
             file_put_contents(public_path().$optimizePath.$name,$data);
-            $input['chachees_number_photo']=$name;
+            $input['chachees_number_photo']=$optimizePath.$name;
         }
         if($request->file('uploadPhotos')){
             foreach($request->file('uploadPhotos') as $file){
@@ -338,23 +365,29 @@ class FinanceController extends Controller
         $input['report_date']=strtotime($request->report_date);
         $input['process']=1;
         $input['user_id']=Auth()->user()->id;    
-        $data=Finance::create($input);
-		$data->report_date=strtotime($request->report_date);
-		$data->inspection_date=$request->inspection_date;
-        if($data){
+        //$data=Finance::create($input);
+		$input['report_date']=strtotime($request->report_date);
+		$input['inspection_date']=$request->inspection_date;
+        if($newReport){
             User::where('ref_start','=',Auth()->user()->ref_start)->increment('ref_start');
         }
         if(isset($input['approve_photo']) && $request->pdf){
-            $data->pdf_file=$this->generate_pdf($data->id);
+            $input['pdf_file']=$this->generate_pdf($newReport->id);
         }
-		$data->save();
-        $this->update_status($data->id);
+		$newReport->update($input);
+        $this->update_status($newReport->id);
         if(!isset($input['approve_photo']) && $request->pdf){
-            return redirect()->route('report.edit', $data->id)->with('warning','Report Created Successfully. But Without Photo Pdf Not Created');
+            return redirect()->route('report.edit', $newReport->id)->with('warning','Report Created Successfully. But Without Photo Pdf Not Created');
         }
-        return redirect()->route('report.edit', $data->id)
+        return redirect()->route('report.edit', $newReport->id)
                         ->with('added','Report Created Successfully.');
     }
+	
+	public function random_strings($length_of_string)
+	{
+		$str_result = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		return substr(str_shuffle($str_result), 0, $length_of_string);
+	}
 
     /**
      * Display the specified resource.
@@ -380,7 +413,7 @@ class FinanceController extends Controller
         $grid=Grid::orderBy('vehicle_make','asc')->orderBy('vehicle_model','asc')->orderBy('variant','asc')->orderBy('year','asc')->get();
         $vehicle_make=Grid::select('vehicle_make')->groupBy('vehicle_make')->orderBy('vehicle_make')->pluck('vehicle_make','vehicle_make');
         $reference_no = Auth()->user()->employee_id.'-'.Auth()->user()->ref_start;
-        $company = Valuation::orderBy('position')->pluck('name','id');
+        $company = Valuation::orderBy('name')->pluck('name','id');
         $staff=Staff::orderBy('position')->where('status','=',1)->pluck('name','id');
         $declaration=Declaration::orderBy('position')->pluck('note','id');
         $finance=Finance::findOrFail($finance);
@@ -410,29 +443,32 @@ class FinanceController extends Controller
                         ->with('deleted','Unable to Make Pdf Without Photo.');
         }
         $base64_image =$request->ch_upload;
-		$optimizePath = '/finance/Report_images/'.date('Y').'/'.date('m').'/';
-		if(!file_exists(public_path().$optimizePath)) {
-			mkdir(public_path().$optimizePath, 0777, true);
+		$optimizeImagePath = config('global.report_main_folder').$financeid.config('global.report_photos');
+		if(!file_exists(public_path().$optimizeImagePath)) {
+			mkdir(public_path().$optimizeImagePath, 0777, true);
 		}
         if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
             $data = substr($base64_image, strpos($base64_image, ',') + 1);
             $data = base64_decode($data);
             $extension = explode('/', mime_content_type($base64_image))[1];
             $name = str_replace(' ', '_',time().'.'.$extension);
-            //$optimizePath = public_path().'/finance/';
-            file_put_contents(public_path().$optimizePath.$name,$data);
-            $input['chachees_number_photo']=$name;
+            file_put_contents(public_path().$optimizeImagePath.$name,$data);
+            $input['chachees_number_photo']=$optimizeImagePath.$name;
+			if(!empty($update['chachees_number_photo']) && \File::exists(public_path().$update['chachees_number_photo'])) {
+				\File::delete(public_path().$update['chachees_number_photo']);
+			}
         }
         if($request->approve_photo){
             $input['approve_photo']=json_encode($request->approve_photo); 
         }
         if($request->file('uploadPhotos')){
-            foreach($request->file('uploadPhotos') as $file){
-                $optimizeImage = Image::make($file);
-                //$optimizePath = public_path().'/finance/';
+            foreach($request->file('uploadPhotos') as $fileKey => $file){
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+				$images[$fileKey] = uploadDocs($file, $optimizeImagePath, null, $filename);
+                /*$optimizeImage = Image::make($file);
                 $name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
-                $optimizeImage->save(public_path().$optimizePath.$name,50);
-                $images[]=$optimizePath.$name;
+                $optimizeImage->save(public_path().$optimizeImagePath.$name,50);
+                $images[$fileKey]=$optimizeImagePath.$name;*/
             }
             $input['photo']=json_encode($images);
             $input['approve_photo']=json_encode($images);
@@ -442,6 +478,24 @@ class FinanceController extends Controller
                 $ap=json_decode($update['approve_photo']);
                 $input['approve_photo']=json_encode(array_merge($ap,$images));  
             }   
+        }
+		
+		$optimizeVideoPath = config('global.report_main_folder').$financeid.config('global.report_videos');
+		if($request->file('uploadVideos')){
+			if(!empty($update['videos'])){
+                $videos = json_decode($update['videos'], 1);
+			}
+            foreach($request->file('uploadVideos') as $fileKey=>$file){
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+				$videos[$fileKey] = uploadDocs($file, $optimizeVideoPath, $videos[$fileKey], $filename);
+                /*$name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+                $file->move(public_path().$optimizeVideoPath, $name);
+				if(!empty($videos[$fileKey]) && \File::exists(public_path().$videos[$fileKey])) {
+                    \File::delete(public_path().$videos[$fileKey]);
+				}
+                $videos[$fileKey]=$optimizeVideoPath.$name;*/
+            }
+            $input['videos']=json_encode($videos);
         }
         if(empty($update['report_date'])){
             $input['user_id']=Auth()->id();
@@ -622,7 +676,7 @@ class FinanceController extends Controller
         ]);
         $request['filterdata']=$request->all();
         $header=Header::first();
-        $data = Finance::select('finances.*','valuations.name','valuations.address')->leftJoin('valuations','finances.valuation_by','=','valuations.id');
+        $data = Finance::select('finances.*','valuations.name','valuations.short_name','valuations.address')->leftJoin('valuations','finances.valuation_by','=','valuations.id');
         $valu_by=false;
 		if($request->filterdata){
 			$filterdata=$request->filterdata;
@@ -724,44 +778,53 @@ class FinanceController extends Controller
       return $arr = array('status' => false,'action'=>'update','msg'=>'Somthing went wrong');
     } 
     public function image_rotate(Request $request){
-        if($request->ajax()){
-             $img = Image::make(public_path('finance').'/'.$request->img);
-             if($request->pos=='right'){
-                $img->rotate(-90);    
-             }else{
-                $img->rotate(+90);
-             }
-             $imageName = $request->img;
-             $destinationPath = public_path("finance/");
-             $img->save($destinationPath . $imageName);
-             $path = public_path("finance/".$request->img);
-             $data = base64_encode(file_get_contents($path)); 
-           return $arr = array('status' => true,'action'=>'update','msg'=>'Image Rotate Successfully','img'=>$data);
+        if($request->ajax()) {
+			$path = public_path().$request->img;
+			$img = Image::make($path);
+			if($request->pos=='right'){
+				$img->rotate(-90);    
+			}else{
+				$img->rotate(+90);
+			}
+			$img->save($path);
+			$data = base64_encode(file_get_contents($path)); 
+			return $arr = array('status' => true,'action'=>'update','msg'=>'Image Rotate Successfully','img'=>$data);
         }
-      return $arr = array('status' => false,'action'=>'update','msg'=>'Somthing went wrong');
+		return $arr = array('status' => false,'action'=>'update','msg'=>'Somthing went wrong');
     } 
     public function image_remove(Request $request){
-       if($request->ajax()){
+		if($request->ajax()) {
             $data = Finance::findOrFail($request->id);
-            if(!empty($data['photo'])){
-                 $photo=json_decode($data['photo']);
-                foreach (array_keys($photo, $request->image, true) as $key) {
-                            unset($photo[$key]);
-                    }
-                $input['photo']=json_encode(array_values($photo));   
-            }
-            if(!empty($data['approve_photo'])){
-                 $approve_photo=json_decode($data['approve_photo']);
-                foreach (array_keys($approve_photo, $request->image, true) as $key) {
-                            unset($approve_photo[$key]);
-                    }
-                $input['approve_photo']=json_encode(array_values($approve_photo));   
-            }
+			if($request->image_type == 'videos') {
+				$videos=json_decode($data['videos'], 1);
+				foreach (array_keys($videos, $request->image, true) as $key) {
+					unset($videos[$key]);
+				}
+				$input['videos']=json_encode($videos); 
+			} else if($request->image_type == 'chachees') {
+				$input['chachees_number_photo']="";   
+			} else {
+				if(!empty($data['photo'])){
+					 $photo=json_decode($data['photo']);
+					foreach (array_keys($photo, $request->image, true) as $key) {
+								unset($photo[$key]);
+						}
+					$input['photo']=json_encode(array_values($photo));   
+				}
+				if(!empty($data['approve_photo'])){
+					 $approve_photo=json_decode($data['approve_photo']);
+					foreach (array_keys($approve_photo, $request->image, true) as $key) {
+								unset($approve_photo[$key]);
+						}
+					$input['approve_photo']=json_encode(array_values($approve_photo));   
+				}
+			}
             if($data){
                     $data->update($input);
-                    if(\File::exists(public_path('finance/'.$request->image))){
-                        \File::delete(public_path('finance/'.$request->image));
-                    return $arr = array('status' => true,'action'=>'deleted','msg'=>'Image Remove Successfully');
+                    if(\File::exists(public_path().$request->image)){
+                        \File::delete(public_path().$request->image);
+					$msg_type = $request->image_type == 'videos' ? 'video' : 'Image';
+                    return $arr = array('status' => true,'action'=>'deleted','msg'=>$msg_type.' Remove Successfully');
                     }else{
                         return $arr = array('status' => false,'action'=>'deleted','msg'=>'Somthing went wrong');
                     }
@@ -836,7 +899,7 @@ class FinanceController extends Controller
     }
 	
     private function generate_excel($rows,$d1,$d2,$header,$valu_by){
-      $valuation_by=' - ';
+      $valuation_by='All Companies';
       if($valu_by){
         $valuation_by=$rows[0]->name;  
       }
@@ -853,7 +916,7 @@ class FinanceController extends Controller
         // NEW WORKSHEET
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setTitle('Invoice  '.date('F-Y',strtoTime($d1)));
+        $sheet->setTitle(date('F_Y',strtoTime($d1)).'_Invoice');
         $sheet->mergeCells('A1:I1');
         $objRichText = new RichText();
         $run1 = $objRichText->createTextRun($header['authorizer_name']);
@@ -917,6 +980,25 @@ class FinanceController extends Controller
         $sheet->mergeCells('A6:I6');
         $sheet->setCellValue('A6', 'LICENCE NO : '.$header["licence_no"].($header["expire"]!=null? '         VALIDITY : '.$header["expire"]:'         IIISLA No : '.$header["iisla_no"]).'           BILL NO : '.date('m/y',strtoTime($d1)).'           DATED : '.date('d-m-Y'));
         $sheet->getStyle('A6')->applyFromArray($styleArray);
+		
+		$borderStyleArray = array(
+            'borders' => array(
+                'top' => array(
+                    'borderStyle' =>Border::BORDER_THIN
+                ),
+                 'bottom' => array(
+                    'borderStyle' =>Border::BORDER_THIN
+                ),
+                  'left' => array(
+                    'borderStyle' =>Border::BORDER_THIN
+                ),
+                   'right' => array(
+                    'borderStyle' =>Border::BORDER_THIN
+                ),
+            ),
+        );
+		$sheet->getStyle('A1:I6')->applyFromArray($borderStyleArray);
+		
         // OUTPUT
         $drawing = new Drawing();
         $drawing->setName('Paid');
@@ -934,7 +1016,7 @@ class FinanceController extends Controller
         $styleArray = array(
             'font'  => array(
                 'size'  => 11,
-                'name'  => 'Calibri',
+                'name'  => 'Times New Roman',
             ),'alignment' => array(
                     'vertical' => Alignment::VERTICAL_TOP,
                 ));
@@ -956,7 +1038,11 @@ class FinanceController extends Controller
 
         $sheet->setCellValue('A7', 'S.No.');
         $sheet->setCellValue('B7', 'Date');
-        $sheet->setCellValue('C7', 'Application No.');
+		if($valu_by){
+			$sheet->setCellValue('C7', 'Application No.');
+		} else {
+			$sheet->setCellValue('C7', 'Valuation Initiated By');
+		}
         $sheet->setCellValue('D7', 'Financer Rep');
         $sheet->setCellValue('E7', 'Registration No.');
         $sheet->setCellValue('F7', 'Make & Model');
@@ -971,7 +1057,11 @@ class FinanceController extends Controller
             $sheet->getRowDimension($i)->setRowHeight(50);
             $sheet->setCellValue('A'.$i,$j);
             $sheet->setCellValue('B'.$i, date('d-m-Y', (int)$value['report_date']));
-            $sheet->setCellValue('C'.$i, $value['application_no']);
+			if($valu_by){
+				$sheet->setCellValue('C'.$i, $value['application_no']);
+			} else {
+				$sheet->setCellValue('C'.$i, $value['name']);
+			}
             $sheet->setCellValue('D'.$i, $value['financer_representative']);
             $sheet->setCellValue('E'.$i, $value['registration_no']);
             $sheet->setCellValue('F'.$i, $value['make_model']);
@@ -986,52 +1076,45 @@ class FinanceController extends Controller
             $obj=$objs->toWord($total);*/
         $spreadsheet->getActiveSheet()->getStyle('A7:I'.$i)
             ->getAlignment()->setWrapText(true);
-        $sheet->getStyle('A7:I'.$i)->applyFromArray($styleArray);
+        $sheet->getStyle('A7:I7')->applyFromArray($styleArray);
+		$styleArray['font']['size'] = 10;
+        $sheet->getStyle('A8:I'.$i)->applyFromArray($styleArray);
         $sheet->mergeCells('A'.$i.':H'.$i);
 
-        $sheet->getStyle('A'.$i)->applyFromArray(array('font'  => array('bold'  => true),'alignment' => array('horizontal' => Alignment::HORIZONTAL_CENTER,)));
-        $sheet->getStyle('I'.$i)->applyFromArray(array('font'  => array('bold'  => true)));
-
+        $sheet->getStyle('A'.$i)->applyFromArray(array('font'  => array('bold'  => true, 'size' => 11),'alignment' => array('horizontal' => Alignment::HORIZONTAL_CENTER,)));
+        $sheet->getStyle('I'.$i)->applyFromArray(array('font'  => array('bold'  => true, 'size' => 11)));
         $sheet->setCellValue('A'.$i, 'Total Amount ('.toWord($total).')');
         $sheet->setCellValue('I'.$i,$total);
         $il=$i+1;
         $ilx=$i+3;
-        $sheet->mergeCells('A'.$il.':I'.$ilx);
-
-        $sheet->getStyle('A'.$il)->applyFromArray(array('font'  => array('bold'  => true),'alignment' => array('horizontal' => Alignment::HORIZONTAL_RIGHT,)));
-        $sheet->setCellValue('A'.$il,'SEAL & SIGNATURE OF SURVEYOR');
-        $styleArray = array(
-            'borders' => array(
-                'top' => array(
-                    'borderStyle' =>Border::BORDER_THIN
-                ),
-                 'bottom' => array(
-                    'borderStyle' =>Border::BORDER_THIN
-                ),
-                  'left' => array(
-                    'borderStyle' =>Border::BORDER_THIN
-                ),
-                   'right' => array(
-                    'borderStyle' =>Border::BORDER_THIN
-                ),
-            ),
-        );
-        for ($i=7; $i <= $il; $i++) { 
-            $sheet->getStyle('A'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('B'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('C'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('D'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('E'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('F'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('G'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('H'.$i)->applyFromArray($styleArray);
-            $sheet->getStyle('I'.$i)->applyFromArray($styleArray);
+        $sheet->mergeCells('A'.$il.':F'.$il);
+        $sheet->mergeCells('G'.$il.':I'.$il);
+		$sheet->getRowDimension($il)->setRowHeight(80);
+        $sheet->getStyle('G'.$il)->applyFromArray(array('font'  => array('name' => 'Times New Roman', 'bold'  => true),'alignment' => array('horizontal' => Alignment::HORIZONTAL_RIGHT,)));
+        $sheet->setCellValue('A'.$il,'This is an electronically generated invoice, hence do not require signature.');
+		//->setWrapText(true)
+		$sheet->getStyle('A'.$il)->applyFromArray(array('font'  => array('name' => 'Courier New', 'bold'  => true), 'alignment'=>array('vertical' => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_LEFT)));
+		$sheet->getStyle('A'.$il)->getAlignment()->setWrapText(true);
+        $sheet->setCellValue('G'.$il,'SEAL & SIGNATURE OF SURVEYOR');
+		$borderStyleCenterTextArray = $borderStyleArray;
+		$borderStyleCenterTextArray['alignment']['horizontal'] = Alignment::HORIZONTAL_CENTER;
+		$sheet->getStyle('A7:I'.$il)->applyFromArray($borderStyleArray);
+        for ($i=7; $i < $il; $i++) { 
+            $sheet->getStyle('A'.$i)->applyFromArray($borderStyleCenterTextArray);
+            $sheet->getStyle('B'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('C'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('D'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('E'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('F'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('G'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('H'.$i)->applyFromArray($borderStyleArray);
+            $sheet->getStyle('I'.$i)->applyFromArray($borderStyleCenterTextArray);
         }
         if(!$valu_by){
                $writer = new Xlsx($spreadsheet);
 
               $date=date_create($d1);
-              $name= date_format($date,"M Y").'.xlsx';
+              $name= 'All_Companies_'.date_format($date,"F_Y").'.xlsx';
 
               header('Content-type: application/vnd.xlsx');
               header('Content-Disposition: attachment; filename="'.$name.'"');
@@ -1039,18 +1122,34 @@ class FinanceController extends Controller
 			  exit;
               return true;   
         }
+		$borderStyleArray = array(
+            'borders' => array(
+                'top' => array(
+                    'borderStyle' =>Border::BORDER_THICK
+                ),
+                 'bottom' => array(
+                    'borderStyle' =>Border::BORDER_THICK
+                ),
+                  'left' => array(
+                    'borderStyle' =>Border::BORDER_THICK
+                ),
+                   'right' => array(
+                    'borderStyle' =>Border::BORDER_THICK
+                ),
+            ),
+        );
         $spreadsheet->createSheet();
         $spreadsheet->setActiveSheetIndex(1);
-        $spreadsheet->getActiveSheet()->setTitle('Covernote  '.date('F-Y',strtoTime($d1)));
+        $spreadsheet->getActiveSheet()->setTitle(date('F_Y',strtoTime($d1)).'_Covernote');
         $sheet =$spreadsheet->setActiveSheetIndex(1);
         $sheet->mergeCells('A1:K1');
         $sheet->mergeCells('A2:K2');
         $objRichText = new RichText();
         $run1 = $objRichText->createTextRun($header['authorizer_name']);
-        $run1->getFont()->applyFromArray(array( "bold" => true, "size" => 15, "name" => "Arial"));
+        $run1->getFont()->applyFromArray(array( "bold" => true, "size" => 20, "name" => "Arial"));
 
         $run2 = $objRichText->createTextRun($header['authorizer_education']);
-        $run2->getFont()->applyFromArray(array("size" => 8, "name" => "Arial",));
+        $run2->getFont()->applyFromArray(array("size" => 10, "name" => "Arial",));
 
         $sheet->setCellValue("A2", $objRichText);
 
@@ -1058,10 +1157,11 @@ class FinanceController extends Controller
 
 
         $sheet->mergeCells('A3:K3');
-        $sheet->mergeCells('A4:K4');
+        $sheet->mergeCells('A4:K5');
+		$sheet->getRowDimension(4)->setRowHeight(7);
         $styleArray = array(
             'font'  => array(
-                'size'  => 12,
+                'size'  => 10,
                 'name'  => 'Arial'
             ),
          'alignment' => array(
@@ -1073,9 +1173,11 @@ class FinanceController extends Controller
 
         $sheet->mergeCells('A6:K6');
         $sheet->setCellValue('A6','EMAIL:'.$header["email1"].'                '.$header["email2"].''.'                MOBILE NO : '.$header["mobile_number"]);
-       
+		$sheet->getStyle('A6')->applyFromArray($styleArray);
         $sheet->mergeCells('A7:K7');
         $sheet->setCellValue('A7', '        LICENCE NO : '.$header["licence_no"].($header["expire"]!=null? '         VALIDITY : '.$header["expire"]:'         IIISLA No : '.$header["iisla_no"]).'           BILL NO : '.date('m/y',strtoTime($d1)).'           DATED : '.date('d-m-Y'));
+		$sheet->getStyle('A7')->applyFromArray($styleArray);
+		$sheet->getStyle('A2:K7')->applyFromArray($borderStyleArray);
         // OUTPUT
         $drawing = new Drawing();
         $drawing->setName('Paid');
@@ -1092,19 +1194,23 @@ class FinanceController extends Controller
         $sheet->mergeCells('A8:K8');
         $sheet->mergeCells('A9:K9');
         $sheet->setCellValue('A9',$valuation_by);
-        $sheet->getStyle('A9')->applyFromArray(array(
+        $sheet->getStyle('A9:A20')->applyFromArray(array(
             'font'  => array(
-                'size'  => 12
+                'size'  => 12,
+				'name'  => 'Times New Roman'
             )));
         $sheet->getStyle('A9')->getFont()->setUnderline(true);
         $sheet->mergeCells('A10:K10');
         $sheet->setCellValue('A10',$rows[0]->address);
         $sheet->getRowDimension('10')->setRowHeight(40);
+		$sheet->mergeCells('A11:K11');
         $sheet->mergeCells('A12:K12');
         $sheet->setCellValue('A12','Subject:- Invoice for valuation of vehicles conducted in '.date('F Y',strtotime($d1)));
         $sheet->getStyle('A12')->applyFromArray(array('font'  => array('bold'  => true)));
+		$sheet->getRowDimension('12')->setRowHeight(20);
+        $sheet->mergeCells('A13:K13');
         $sheet->mergeCells('A14:K14');
-        $sheet->setCellValue('A14','Sir/Madam');
+        $sheet->setCellValue('A14','Respected Sir/Madam');
         $sheet->mergeCells('A15:K15');
         $objRichText = new RichText();
         
@@ -1123,14 +1229,25 @@ class FinanceController extends Controller
 
         $sheet->getCell('A15')->setValue($objRichText);
         $sheet->mergeCells('A16:K16');
-        $sheet->setCellValue('A16','Thanking you and assuring our best services, we remain,');
-        $sheet->mergeCells('A18:K18');
-        $sheet->mergeCells('A19:c19');
-        $sheet->setCellValue('A19',"Yours's Faithfully");
-        $sheet->mergeCells('A22:c22');
-        $sheet->setCellValue('A22',"Arvind Kumar Mittal");
-        $sheet->mergeCells('A23:c23');
-        $sheet->setCellValue('A23',"Surveyor & Loss Assessor");
+        $sheet->mergeCells('A17:K17');
+        $sheet->setCellValue('A17','Thanking you and assuring our best services, we remain,');
+        $sheet->mergeCells('A18:K19');
+        $sheet->mergeCells('A20:K20');
+        $sheet->setCellValue('A20',"Yours's Faithfully");
+        $sheet->mergeCells('A21:D21');
+        $sheet->setCellValue('A21',"Arvind Kumar Mittal");
+		$sheet->mergeCells('A22:D22');
+        $sheet->setCellValue('A22',"Surveyor & Loss Assessor");
+		$sheet->getStyle('A21:A22')->applyFromArray(array('font'  => array('name' => 'Times New Roman'), 'alignment'=>array('horizontal' => Alignment::HORIZONTAL_LEFT)));
+		$sheet->mergeCells('E21:K22');
+        $sheet->setCellValue('E21',"This is an electronically generated invoice, hence do not require signature.");
+		$sheet->getStyle('E21')->applyFromArray(array('font'  => array('name' => 'Courier New', 'bold'  => true), 'alignment'=>array('vertical' => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_LEFT)));
+		$sheet->getStyle('E21')->getAlignment()->setWrapText(true);
+		$sheet->getRowDimension('21')->setRowHeight(100);
+		$sheet->getStyle('A21:D22')->applyFromArray($borderStyleArray);
+		$sheet->getStyle('E21:K22')->applyFromArray($borderStyleArray);
+        //$sheet->mergeCells('A23:c23');
+        //$sheet->setCellValue('A23',"Surveyor & Loss Assessor");
        /* $sheet->setCellValue('A15','Please find the attached invoice for the 145 valuations and inspections of vehicles conducted in the month of July 2020 amounting to Rs. 14,500/- (Fourteen Thousand and Five hundred rupees only).');*/
         $sheet->getRowDimension('15')->setRowHeight(50);
         $sheet->getStyle('A15')->getAlignment()->setWrapText(true);
@@ -1143,27 +1260,15 @@ class FinanceController extends Controller
                     'vertical' => Alignment::VERTICAL_TOP,
                 )));
         $sheet->getStyle('A10')->getAlignment()->setWrapText(true);
-        $styleArray = array(
-            'borders' => array(
-                'top' => array(
-                    'borderStyle' =>Border::BORDER_THICK
-                ),
-                 'bottom' => array(
-                    'borderStyle' =>Border::BORDER_THICK
-                ),
-                  'left' => array(
-                    'borderStyle' =>Border::BORDER_THICK
-                ),
-                   'right' => array(
-                    'borderStyle' =>Border::BORDER_THICK
-                ),
-            ),
-        );
-        $sheet->getStyle('A2:K44')->applyFromArray($styleArray);
+        $sheet->getStyle('A2:K35')->applyFromArray($borderStyleArray);
         $writer = new Xlsx($spreadsheet);
 
         $date=date_create($d1);
-        $name= date_format($date,"F_Y").'.xlsx';
+		$name = '';
+		if($valu_by){
+			$name .= $rows[0]->short_name.'_';  
+		}
+        $name .= date_format($date,"F_Y").'.xlsx';
         header('Content-type: application/vnd.xlsx');
         header('Content-Disposition: attachment; filename="'.$name.'"');
 		//ob_end_clean();
@@ -1530,7 +1635,7 @@ class FinanceController extends Controller
             $lastPhoto = count(json_decode($FinanceData["Finance"]['approve_photo']));
            
             foreach($phto as $key => $data ){
-                $source_img = public_path("/finance/").$data;
+                $source_img = public_path().$data;
                 $destination_img = public_path("tmp/").$key.$FinanceData['Finance']['id'].'destination.jpg';
                 $imgtem[]=$key;
                 $comimg = $this->compress($source_img, $destination_img,20);

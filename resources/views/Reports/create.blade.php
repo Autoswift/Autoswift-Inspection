@@ -1207,6 +1207,33 @@
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
+			
+			<div class="videoUploadBlock">
+				<div class="col-md-2 col-12">
+					<span>Videos</span>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 1 (Exterior)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[0]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 2 (Interior)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[1]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 3 (Running)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[2]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+			</div>
+			
+			
+			
             <div class="col-md-4 col-12 videos" style="display: none;">
                <video id="video1" width="320" height="240" controls src=""></video>
                <p><b>Video-1</b></p>

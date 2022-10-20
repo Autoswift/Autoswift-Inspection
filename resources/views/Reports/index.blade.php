@@ -154,16 +154,16 @@ $urlroot=\Request::route()->getName();
                      <br>
                      <br>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="s_date" class="form-control datepicker" id="to" placeholder="Search Bill Date From" type="text"></div>
+                        <div class="input text"><input type="text" name="s_date" class="form-control datepicker" id="to" placeholder="Search Bill Date From" value="{{old('s_date')}}" type="text"></div>
                      </div>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="e_date" class="form-control datepicker" id="from" placeholder="Search Bill Date To" type="text"></div>
+                        <div class="input text"><input type="text" name="e_date" class="form-control datepicker" id="from" placeholder="Search Bill Date To" value="{{old('e_date')}}" type="text"></div>
                      </div>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="create_date" class="form-control datepicker" id="createTo" placeholder="Search Creation Date From" type="text"></div>
+                        <div class="input text"><input type="text" name="create_date" class="form-control datepicker" id="createTo" placeholder="Search Creation Date From" value="{{old('create_date')}}" type="text"></div>
                      </div>
                      <div class="col-md-2">
-                        <div class="input text"><input type="text" name="create_end" class="form-control datepicker" id="createFrom" placeholder="Search Creation Date To" type="text"></div>
+                        <div class="input text"><input type="text" name="create_end" class="form-control datepicker" id="createFrom" placeholder="Search Creation Date To" value="{{old('create_end')}}" type="text"></div>
                      </div>
                      <div class="col-md-2">
                         <div class="input text"><input name="amount_from" class="form-control" placeholder="Amount From" type="text" id="FinanceAmountFrom"></div>

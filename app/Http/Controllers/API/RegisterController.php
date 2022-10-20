@@ -45,7 +45,11 @@ class RegisterController extends BaseController
     public function login(Request $request)
     {
         if(Auth::attempt(['username' => $request->username, 'password' => $request->password])){ 
-            $user = Auth::user(); 
+            $user = Auth::user();
+			if((!empty($user->device_id) && $user->device_id != $request->device_id) || empty($request->device_id)) {
+				return $this->sendError('Unauthorised.', ['error'=>'Device not matched.']);
+			}
+			
             $success['token'] =  $user->createToken('MyApp')->accessToken; 
             $success['name'] =  $user->name;
             $success['id'] =  $user->id;
@@ -62,7 +66,7 @@ class RegisterController extends BaseController
              $success['position']="WebAdmin";
             };
             if($user->status == 'active' ){
-                $success['user_status']=1;
+                $success['user_status']=1; //
             }
             if($user->status == 'inactive' ){
                 $success['user_status']=0;
@@ -77,6 +81,12 @@ class RegisterController extends BaseController
             if($user->status == 'rejected' ){
                 $success['user_status']=4;
             }
+			
+			$success['profile_status'] = 'completed';
+			if(empty($user->device_id) || $user->status == 'rejected' || $user->status == 'requested') {
+				$success['profile_status'] = 'pending';
+			}
+			
             $input['app_version']=$request->app_version;
             $input['mobile_model']=$request->mobile_model;
             $input['device_id']=$request->device_id;

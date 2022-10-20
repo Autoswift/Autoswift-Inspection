@@ -40,6 +40,7 @@ class ValuationController extends Controller
     {
         $request->validate([
             'name' => 'required',
+            'short_name' => 'required|string|max:6|unique:valuations,short_name'
         ]);
         $input = $request->all();
         if($request->file('gridpdf')){
@@ -88,7 +89,8 @@ class ValuationController extends Controller
     public function update(Request $request, Valuation $valuation)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required',
+			'short_name' => 'required|string|max:6|unique:valuations,short_name,'.$valuation->id
         ]);
         $input = $request->all(); 
         if($request->file('gridpdf')){

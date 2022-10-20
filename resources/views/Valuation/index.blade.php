@@ -39,8 +39,10 @@
                         <th style="width:25px;">S.No.</th>
                         <th style="display:none;">id</th>
                         <th>Valuations Initiated By</th>
+                        <th>Initials</th>
                         <th>Address</th>
                        	<th>VIB_Grid</th>
+						<th>Status</th>
                         <th>Action</th>
                      </tr>
                   </thead>
@@ -50,6 +52,7 @@
                          <td>{{$key+1}}</td>
                          <td style="display:none;">{{$val->id}}</td>
                          <td>{{$val->name}}</td>
+                         <td>{{$val->short_name}}</td>
                          <td>{{$val->address}}</td>
                          <td>
                          @if($val->grid_pdf!='' || $val->grid_pdf!=null)
@@ -60,6 +63,13 @@
                          	{{'N/A'}}
                          @endif
                          </td>
+						<td>@if($val->status=='active')
+                           <button type="button" class="btn btn-success btn-xs" onclick="statuschange('{{$val->id}}','{{$val->status}}')">Active</button>
+                           @endif
+                           @if($val->status=='inactive')
+                           <button type="button" class="btn btn-warning btn-xs"  onclick="statuschange('{{$val->id}}','{{$val->status}}')">Inactive</button>
+                           @endif
+                        </td>
                          <td style="text-align:left;">
                            <a href="{{ route('valuation.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>

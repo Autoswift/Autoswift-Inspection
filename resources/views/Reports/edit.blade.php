@@ -2,6 +2,7 @@
 @section('title', 'Edit Report')
 @section('style')
 <link rel="stylesheet" type="text/css" href="{{asset('js/croppic/croppie.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('js/fancyBox/source/jquery.fancybox.css')}}">
 <style type="text/css">
    ::placeholder {
    color: #000!important;
@@ -1161,11 +1162,11 @@
             <div class="col-md-3 col-12">
                <div class="profile-header mb-2">
                   <div class="relative ">
-                     @if($finance-> chachees_number_photo)
-                     <img id="previewimage" src="{{asset('finance')}}/{{$finance->chachees_number_photo}}" style="width: 253px; height: 141px;">
-                     @else
-                      <img id="previewimage" style="width: 253px; height: 141px;">
-                     @endif
+                    @if($finance-> chachees_number_photo)
+						<div class="imagechachees0"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$finance->chachees_number_photo}}","chachees0","chachees")>Remove</a></li><li><a href="#" onclick=rotate("{{$finance->chachees_number_photo}}","right","previewimage")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$finance->chachees_number_photo}}","left","previewimage")><i class="fa fa-rotate-left"></i></a></li></ul></div><img id="previewimage" src="{{asset($finance->chachees_number_photo)}}" style="width: 253px; height: 141px;"><div style="text-align: center;"></div></div>
+                    @else
+						<img id="previewimage" style="width: 253px; height: 141px;">
+                    @endif
                   </div>
                </div>
             </div>
@@ -1207,7 +1208,7 @@
                         @endphp
                         @if($photo)
                            @foreach($photo as $key=>$item)
-                        <li class="ui-state-default image{{$key}}" id="image_{{$item}}"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$item}}","{{$key}}")>Remove</a></li><li><a href="#" onclick=rotate("{{$item}}","right")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$item}}","left")><i class="fa fa-rotate-left"></i></a></li></ul></div><img src="{{asset($item)}}" title="{{$item}}" ><div style="text-align: center;"><input type="checkbox" name="approve_photo[]" class="approve-check" value="{{$item}}" @if(in_array($item,$approve_photo)) checked @endif></div>
+                        <li class="ui-state-default image{{$key}}" id="image_{{$item}}"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$item}}","{{$key}}","photo")>Remove</a></li><li><a href="#" onclick=rotate("{{$item}}","right","photo_{{$key}}")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$item}}","left","photo_{{$key}}")><i class="fa fa-rotate-left"></i></a></li></ul></div><img src="{{asset($item)}}" title="{{$item}}" id="photo_{{$key}}"><div style="text-align: center;"><input type="checkbox" name="approve_photo[]" class="approve-check" value="{{$item}}" @if(in_array($item,$approve_photo)) checked @endif></div>
                         </li>
                            @endforeach
                         @endif
@@ -1224,23 +1225,62 @@
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
+			
+			<div class="videoUploadBlock">
+				<div class="col-md-2 col-12">
+					<span>Videos</span>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 1 (Exterior)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[0]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 2 (Interior)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[1]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Video 3 (Running)</label>
+					<div class="form-group">
+						<input type="file" name="uploadVideos[2]"  style="background-color: #31708F; color: #fff;" class="form-control" accept="video/mp4">
+					</div>
+				</div>
+			</div>
+			
+			
+			
             @php
             if($finance->videos){
-               $video=json_decode($finance->videos);
+               $video=json_decode($finance->videos, 1);
+			   //prd($video);
             }
             @endphp
-            @if(!empty($video[0]))
-            <div class="col-md-4 col-12 videos">
-               <video id="video1" width="320" height="240" controls src="{{asset('videos/'.$video[0])}}"></video>
-               <p><b>Video-1</b></p>
+			<div class="col-md-2 col-12 videos">&nbsp;</div>
+            <div class="col-md-3 col-12 videos0">
+				@if(!empty($video[0]))
+					<a href="#" onclick=removimg("{{$video[0]}}","0","videos")>Remove</a><br>
+					<video id="video1" width="320" height="240" controls src="{{asset($video[0])}}"></video>
+					<p><b>Video-1</b></p>
+				@endif
             </div>
-            @endif
-            @if(!empty($video[1]))
-            <div class="col-md-4 col-12 videos">
-               <video  id="video2" width="320" height="240" controls src="{{asset('videos/'.$video[0])}}"></video>
-               <p><b>Video-2</b></p>
+            <div class="col-md-3 col-12 videos1">
+				@if(!empty($video[1]))
+					<a href="#" onclick=removimg("{{$video[1]}}","1","videos")>Remove</a><br>
+					<video  id="video2" width="320" height="240" controls src="{{asset($video[1])}}"></video>
+					<p><b>Video-2</b></p>
+				@endif
             </div>
-            @endif
+            <div class="col-md-3 col-12 videos2">
+				@if(!empty($video[2]))
+					<a href="#" onclick=removimg("{{$video[2]}}","2","videos")>Remove</a><br>
+					<video  id="video2" width="320" height="240" controls src="{{asset($video[2])}}"></video>
+					<p><b>Video-3</b></p>
+				@endif
+            </div>
+			
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
@@ -1427,6 +1467,7 @@
             {!! Form::close() !!}
          </div>
       </div>
+@include('layouts.custom_image_slider')
 @endsection
 @section('script')      
 <script src="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
@@ -1440,9 +1481,9 @@ var dp_eg=0;
 var grid_pdf;
 var count = 0;   
 $(document).ready(function(){
-    table=$('#DataTables_Table_9').DataTable({
-      pageLength: 50,
-      lengthMenu: [[50,100,500,1000], [50,100,500,1000]],
+	table=$('#DataTables_Table_9').DataTable({
+		pageLength: 50,
+		lengthMenu: [[50,100,500,1000], [50,100,500,1000]],
     });
    
    $( ".pickadate" ).prop('autocomplete','off');
@@ -1522,14 +1563,17 @@ $(document).ready(function(){
           $("#uploadPhoto").change(function() {
               readMultipleURL(this);
           });
+		$('#previewimage').click(function (){
+				var imgSrc = $(this).attr('src');
+				window.open(imgSrc,"","width=550,height=170,left=150,top=200,toolbar=0,status=0,");
+		});
+		  
           function readMultipleURL(input) {
               $('#listImages').empty();
               for (var i = 0; i < input.files.length; i++) {
                   var reader = new FileReader();
                   reader.onload = function(e) {
-      
-                      $('#listImages').append('<div class="col-md-2 col-12"><img src="' + e.target.result + '"class="img-fluid mb-4"/></div>')
-      
+                      $('#listImages').append('<div class="col-md-2 col-12"><img src="' + e.target.result + '"class="img-fluid mb-4"/></div>');
                   }
                   reader.readAsDataURL(input.files[i]);
               }
@@ -1617,36 +1661,48 @@ function getduplicate(){
       $("#duplicate_reason").empty();
    }
 }
-function rotate(img,pos){
-   event.preventDefault();
-   $.post("{{route('image_rotate')}}",{img:img,pos:pos},function(result){
-      if (result.status == true) {
-          url=$("img[title|='"+img+"']").attr('src','data:image/gif;base64,'+result.img);
-         toastr.success(result.msg, "success");
-      } else {
-         toastr.error(result.msg, "Error");
-      }
-   })
+function rotate(img,pos,photoId){
+	event.preventDefault();
+	$.post("{{route('image_rotate')}}",{img:img,pos:pos},function(result){
+		if (result.status == true) {
+			$("#"+photoId).attr('src','data:image/gif;base64,'+result.img);
+			toastr.success(result.msg, "success");
+		} else {
+			toastr.error(result.msg, "Error");
+		}
+	})
 }
-function removimg(id, ii) {
+function removimg(id, ii, image_type) {
           event.preventDefault();
+		if(image_type == 'videos') {
+			var swaltoast = "You Want  Remove Video! it's Permanently Deleted";
+		} else {
+			var swaltoast = "You Want  Remove Image! it's Permanently Deleted";
+		}
           swal({
                   title: "Are you sure?",
-                  text: "You Want  Remove Image ! it's Permanently Deleted ",
+                  text: swaltoast,
                   icon: "warning",
                   buttons: true,
                   dangerMode: true,
               })
               .then((willDelete) => {
                   if (willDelete) {
-                     $.post("{{route('image_remove')}}",{id:"{{$finance->id}}",image: id},function(result){
+                     $.post("{{route('image_remove')}}",{id:"{{$finance->id}}",image: id,image_type:image_type},function(result){
                         if (result.status == true) {
                            toastr.success(result.msg, "success");
-                           $('.image' + ii).empty();
                         } else {
                            toastr.error(result.msg, "Error");
-                           $('.image' + ii).empty();
                         }
+						if(image_type == 'videos') {
+							$('.videos' + ii).empty();
+						} else {
+							if(image_type == 'chachees') {
+								$('.image' + ii).html('<img id="previewimage" style="width: 253px; height: 141px;">');
+							} else {
+								$('.image' + ii).empty();
+							}
+						}
                      })
                   }
               });

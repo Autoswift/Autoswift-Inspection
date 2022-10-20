@@ -33,33 +33,35 @@
                <table class="table table-bordered table-hover table-striped" style="width: 100%">
                   <thead>
                      <tr>
-                        <th style="text-align:center;">#</th>
-                        <th style="display:none;">id</th>
-                        <th>Date</th>
-                        <th>Name</th>
+                        <th>S.No.</th>
+                        <th>ID</th>
+                        <th>Staff Name</th>
+                        <th>Sort Name</th>
                         <th>Mobile No</th>
                         <th>Address</th>
-                        <th>Sort Name</th>
-                        <th>Photo</th>
+                        <th>Email</th>
+                        <th>Docs</th>
+                        <th>Creation Date</th>
                         <th>Status</th>
-                        <th style="text-align:center;">Action</th>
+                        <th>Action</th>
                      </tr>
                   </thead>
                   <tbody>
                       @foreach($staff as $key=>$val)
                        <tr>
-                         <td style="text-align:center;">{{$key+1}}</td>
-                          <td style="display:none;">{{$val->id}}</td>
-                         <td><?php echo date('d-m-Y', strtotime($val->created_at))?></td>
+                         <td>{{$key+1}}</td>
+                          <td>{{$val->id}}</td>
                          <td>{{$val->name}}</td>
+                         <td>{{$val->sort_name}}</td>
                          <td>{{$val->mobile_number}}</td>
                          <td>{{$val->address}}</td>
-                         <td>{{$val->sort_name}}</td>
-                         <td>@if ($val->photo != null)<img src="{{asset('document/'.$val->photo)}}" width="100px" height="50px"> @else N/A @endif</td>
+                         <td>{{$val->staff_email}}</td>
+                         <td>@if ($val->icard != null OR $val->govt_issue_id != null OR $val->back_govt_card != null)<a data-url="{{$val->icard}},{{$val->govt_issue_id}},{{$val->back_govt_card}}"><i class="fa fa-picture-o open_photo_slider" aria-hidden="true"></i></a> @else N/A @endif</td>
+                         <td><?php echo date('d-m-Y', strtotime($val->created_at))?></td>
                          <td>
                            <button type="button" class="btn @if($val->status)btn-success @else btn-warning @endif staff_status" id="{{$val->id}}">@if($val->status) Active @else Inactive @endif</button>     
                           </td>
-                         <td style="text-align:center;">
+                         <td>
                            <a href="{{ route('staff.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                            <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
@@ -92,6 +94,7 @@
    </div>
    <!-- /.container-fluid -->
 </div>
+@include('layouts.custom_image_slider')
 </div>
 @endsection
 @section('script')

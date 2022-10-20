@@ -232,3 +232,29 @@ ul.alert-dropdown {
 .panel-yellow > a:hover {
     color: #df8a13;
 }
+
+[class^=zoom] {
+	width: 350px;
+	height: 200px;
+	-webkit-transition: all .2s ease-in-out;
+	-moz-transition: all .2s ease-in-out;
+	-o-transition: all .2s ease-in-out;
+	-ms-transition: all .2s ease-in-out;
+	cursor:zoom-in;
+}
+ 
+.transition {
+	-webkit-transform: scale(2); 
+	-moz-transform: scale(2);
+	-o-transform: scale(2);
+	transform: scale(2);
+}
+[id^=photo_] {
+	cursor:pointer;
+}
+
+#dragImage {
+	border: 15px solid #000;
+}
+.buttons-columnVisibility span {color:#fff;}
+.open_photo_slider { cursor:pointer; }
