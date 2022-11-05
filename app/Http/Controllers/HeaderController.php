@@ -26,7 +26,7 @@ class HeaderController extends Controller
      */
     public function create()
     {
-        //
+        return view('Header.create');
     }
 
     /**
@@ -37,7 +37,45 @@ class HeaderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validationArr = [];
+		$messages = [
+			'expire.required' => 'The validity field is required.',
+			'iisla_no.required' => 'The iiisla no field is required.',
+		];
+		$validationArr = [
+            'licence_no' => 'required',
+            'email1' => 'required',
+            'email2' => 'required',
+            'mobile_number' => 'required',
+            'authorizer_name' => 'required',
+            'authorizer_education' => 'required',
+            'authorizer_designation' => 'required',
+            'report_heading' => 'required',
+            'logo' => 'nullable|image|mimes:jpg,png,gif,jpeg'
+        ];
+        if($request->ex_validity=='validity'){
+			$validationArr['expire'] = 'required';		   
+        }else{
+			$validationArr['iisla_no'] = 'required';
+        }
+		$request->validate($validationArr, $messages);
+        $input = $request->all();
+        if($request->ex_validity=='validity'){
+           $input['iisla_no'] = Null;  
+        }else{
+           $input['expire']=Null;
+        }
+        if($request->file('logo')!=null){
+            $file = $request->file('logo');
+            $optimizeImage = Image::make($file);
+            $optimizePath = public_path().'/image/';
+            $name = 'logo_auto_'.time().'.'.$file->getClientOriginalExtension();
+            $optimizeImage->save($optimizePath.$name, 72);
+            $input['logo'] = $name;
+        }
+		$header = Header::create($input);
+        $header->save();
+        return redirect('header')->with('added', 'Header Added Successfully.');
     }
 
     /**
@@ -71,7 +109,12 @@ class HeaderController extends Controller
      */
     public function update(Request $request, Header $header)
     {
-       $request->validate([
+		$validationArr = [];
+		$messages = [
+			'expire.required' => 'The validity field is required.',
+			'iisla_no.required' => 'The iiisla no field is required.',
+		];
+		$validationArr = [
             'licence_no' => 'required',
             'email1' => 'required',
             'email2' => 'required',
@@ -81,16 +124,13 @@ class HeaderController extends Controller
             'authorizer_designation' => 'required',
             'report_heading' => 'required',
             'logo' => 'nullable|image|mimes:jpg,png,gif,jpeg'
-        ]);
+        ];
         if($request->ex_validity=='validity'){
-           $request->validate([
-            'expire' => 'required',
-           ]);  
+			$validationArr['expire'] = 'required';		   
         }else{
-            $request->validate([
-            'iisla_no' => 'required',
-           ]);
+			$validationArr['iisla_no'] = 'required';
         }
+		$request->validate($validationArr, $messages);
         $input = $request->all();
         if($request->ex_validity=='validity'){
            $input['iisla_no'] = Null;  
@@ -101,7 +141,7 @@ class HeaderController extends Controller
             $file = $request->file('logo');
             $optimizeImage = Image::make($file);
             $optimizePath = public_path().'/image/';
-            $name = 'logo_auto.'.$file->getClientOriginalExtension();
+			$name = 'logo_auto_'.time().'.'.$file->getClientOriginalExtension();
             $optimizeImage->save($optimizePath.$name, 72);
             $input['logo'] = $name;
         }
@@ -118,6 +158,10 @@ class HeaderController extends Controller
      */
     public function destroy(Header $header)
     {
-        //
+		if($header->id == 1) {
+			return redirect('header')->with('deleted', 'This Header can not be deleted !');
+		}
+		$header->delete();
+		return redirect('header')->with('deleted', 'Header has been deleted !');
     }
 }

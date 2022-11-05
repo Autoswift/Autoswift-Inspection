@@ -23,7 +23,7 @@
                <li class="active">
                   <i class="fa fa-edit"></i>Duplicate Reasons
                </li>
-               <span style="float:right;"><a href="{{ route('duplicate.create')}}"><i class="fa fa-plus"></i> Add Duplicate Reason</a></span>
+               <span style="float:right;"><a target="_blank" href="{{ route('duplicate.create')}}"><i class="fa fa-plus"></i> Add Duplicate Reason</a></span>
             </ol>
          </div>
       </div>
@@ -49,7 +49,7 @@
                          <td style="display:none;">{{$val->id}}</td>
                          <td>{{$val->reason}}</td>
                          <td style="text-align:left;">
-                           <a href="{{ route('duplicate.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
+                           <a target="_blank" href="{{ route('duplicate.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                            <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                       <div class="modal-dialog modal-sm">

@@ -85,6 +85,10 @@ $urlroot=\Request::route()->getName();
 	th, td {
 	  border: 1px solid black !important;
 	}*/
+	.btn-sm.is_for_deposit {
+		padding: 2px 4px;
+		font-size: 10px;
+	}
 </style>
 @endsection
 @section('content')
@@ -124,6 +128,19 @@ $urlroot=\Request::route()->getName();
             </ol>
          </div>
       </div>
+	  <div class="row">
+		<div class="col-lg-3" style="margin: 0 0 15px 5px;">
+			@php
+			$muticheckAction = route('multicheck_action_report');
+			@endphp
+        	{!! Form::Label('multicheck_action', 'Multi Check Action:') !!}
+			<select id="multicheck_action" onclick="multicheck_action('{{ $muticheckAction}}');" name="item_id">
+				<option value="none" selected="selected">None</option>
+				<option value="update_deposit" toast-text="Do you want the change deposit value for selected reports?">Update Deposit</option>
+				<option value="delete" toast-text="Do you want the deleted selected reports?">Delete</option>
+			</select>
+		</div>
+	</div>
       <div class="row" style="margin:20px 0;">
          <div>
             <div style="border: 1px solid rgb(204, 204, 204); padding: 15px 0 0 0;">
@@ -180,7 +197,13 @@ $urlroot=\Request::route()->getName();
                         <div class="input text"><input name="application_no" class="form-control" placeholder="Search Application No" maxlength="255" type="text" id="application_no"></div>
                      </div>
                       <div class="col-md-2">
-                        <div class="input text"><input name="chachees_number" class="form-control" placeholder="Search Chassis Number" maxlength="255" type="text" id="  chachees_number"></div>
+                        <div class="input text"><input name="chachees_number" class="form-control" placeholder="Search Chassis Number" maxlength="255" type="text" id="chachees_number"></div>
+                     </div>
+                     <div class="col-md-2">
+                        <div class="input text"><input name="report_id_from" class="form-control" placeholder="Repord Id From" maxlength="255" type="number" id="report_id_from"></div>
+                     </div>
+                      <div class="col-md-2">
+                        <div class="input text"><input name="report_id_to" class="form-control" placeholder="Repord Id To" maxlength="255" type="number" id="report_id_to"></div>
                      </div>
                      @if(Auth()->user()->role==1)
                      <div class="col-md-2">
@@ -189,6 +212,8 @@ $urlroot=\Request::route()->getName();
                         </div>
                      </div>
                      @endif
+					 <br>
+                     <br> 
                      <div class="col-md-2">
                         <div class="input select">
                            <select name="search_on" class="form-control" id="search_on">
@@ -198,6 +223,7 @@ $urlroot=\Request::route()->getName();
                               <option value="2">Payment Received</option>
                               <option value="3">Deposit</option>
                               <option value="4">Non-Deposit</option>
+                              <option value="6">Deposit List Only</option>
                            </select>
                         </div>
                      </div>
@@ -261,6 +287,7 @@ $urlroot=\Request::route()->getName();
                <table class="table table-bordered table-hover table-striped" id="report_table" style="width:100%;table-layout: fixed;background-color: transparent;border-spacing: 0;border-collapse: collapse;">
                   <thead>
                      <tr>
+                        <th style="text-align:center;width:6px;" ><input type="checkbox" id="multicheck"></th>
                         <th style="text-align:center;width:6px;" >S.No.</th>
 						<th style="width:17px;">Creation Date</th>
                         <th style="width:14px;">Report Date</th>
@@ -294,23 +321,23 @@ $urlroot=\Request::route()->getName();
             </style>
          </div>
       </div>
-      <div id="deleteModal" class="delete-modal modal fade" role="dialog">
-         <div class="modal-dialog modal-sm">
-                           <!-- Modal content-->
-               <div class="modal-content">
-                 <div class="modal-body text-center">
-                   <h4 class="modal-heading">Are You Sure ?</h4>
-                   <p>Do you really want to delete these records? This process cannot be undone.</p>
-                 </div>
-                 <div class="modal-footer">
-                   {!! Form::open(['method' => 'DELETE', 'action' => ['FinanceController@destroy',0],'id'=>'delete_form']) !!}
-                       <button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
-                       <button type="submit" class="btn btn-danger">Yes</button>
-                   {!! Form::close() !!}
-                 </div>
-               </div>
-         </div>
-      </div>
+		<div id="deleteModal" class="delete-modal modal fade" role="dialog">
+			<div class="modal-dialog modal-sm">
+						   <!-- Modal content-->
+				<div class="modal-content">
+					<div class="modal-body text-center">
+						<h4 class="modal-heading">Are You Sure ?</h4>
+						<p>Do you really want to delete these records? This process cannot be undone.</p>
+					</div>
+					<div class="modal-footer">
+					{!! Form::open(['method' => 'DELETE', 'action' => ['FinanceController@destroy',0],'id'=>'delete_form']) !!}
+						<button type="reset" class="btn btn-gray translate-y-3" data-dismiss="modal">No</button>
+						<button type="submit" class="btn btn-danger">Yes</button>
+					{!! Form::close() !!}
+					</div>
+				</div>
+			</div>
+		</div>
       <div id="deposite_Modal" class="modal fade" role="dialog">
          <div class="modal-dialog">
             <!-- Modal content-->
@@ -356,7 +383,9 @@ $urlroot=\Request::route()->getName();
 </div>
 </div>
 @endsection
-@section('script')  
+@section('script')
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script type="text/javascript" src="{{ asset('js/multicheck.js') }}"></script>
 @if($errors->any())
    <script type="text/javascript">
       toastr.error('{!! implode('', $errors->all('<div>:message</div>')) !!}',"Error");
@@ -386,11 +415,12 @@ $urlroot=\Request::route()->getName();
 
 $(document).keypress(function (e) {
 	if (e.which == 13) {
-    $('#search').trigger('click');
-  }
+		e.preventDefault();
+		$('#search').trigger('click');
+	}
 });
 	
-   $('#search').click(function(){
+	$('#search').click(function(event){
       event.preventDefault();
       $('#report_table').DataTable().destroy();
         var formdata = $("#FinanceOldForm").serializeArray();
@@ -399,13 +429,44 @@ $(document).keypress(function (e) {
         });
         filterdata['search'] = true;
       getdata()
-   })
-   $(document).on('click','.delete_report',function(){
-      event.preventDefault();
-      $('#delete_form').attr('action','{{route("report.index")}}/'+$(this).attr('id'))
-      $('#deleteModal').modal('show');
-   })
-    $(document).on('click','.deposite_amount',function(){
+	});
+	
+	$(document).on('click','.delete_report',function(event){
+		event.preventDefault();
+		$('#delete_form').attr('action','{{route("report.index")}}/'+$(this).attr('id'))
+		$('#deleteModal').modal('show');
+	});
+	
+    $(document).on('click', '.is_for_deposit',function(event) {
+		user="{{Auth()->user()->role}}";
+		if(user!=1){
+			toastr.error("This action is unauthorized");
+			return false;
+		}
+		event.preventDefault();
+		var is_for_deposit_button = $(this);
+		var is_for_deposit = $(is_for_deposit_button).attr('rel');
+		$.ajax({
+			type:"POST",
+			url:'{{route("update_deposit")}}/'+$(this).attr('report_id'),
+			data:{is_for_deposit:is_for_deposit},
+			success: function(response) {
+				if(response.status) {
+					if(is_for_deposit == 1) {
+						$(is_for_deposit_button).attr('rel', 0).addClass('btn-warning').removeClass('btn-success').html('<i title="Remove for deposit list" class="fa fa-minus"></i>');
+						toastr.success('Report added to deposit list.',"Success");
+					} else {
+						$(is_for_deposit_button).attr('rel', 1).addClass('btn-success').removeClass('btn-warning').html('<i  title="Set for deposit list" class="fa fa-plus"></i>');
+						toastr.success('Report removed from deposit list.',"Success");
+					}
+				} else {
+					toastr.error("Error in updating deposit list.");
+				}
+			}
+		});
+	});
+   
+   $(document).on('click','.deposite_amount',function(event){
       user="{{Auth()->user()->role}}";
       if(user!=1){
          toastr.error("This action is unauthorized");
@@ -419,18 +480,24 @@ $(document).keypress(function (e) {
       })
       $('#deposit_form').attr('action','{{route("update_deposit")}}/'+$(this).attr('id'))
       $('#deposite_Modal').modal('show');
-   })
-   $('#deposit_form').submit(function(){
-      event.preventDefault();
-      $.post($('#deposit_form').attr('action'),$('#deposit_form').serialize(),function(result){
-          if(result.status==true){
-              toastr.success(result.msg,"Success");
-          } else{
-              toastr.error("Somthing Went Wrong","Error");
-          }
-          $('#deposite_Modal').modal('hide');
-       });
-   }) 
+   });
+   
+	$('#deposit_form').submit(function(){
+		event.preventDefault();
+		if($('#deposit_form').attr('action') == 'update_deposit_multicheck') {
+			$('#deposit_form').attr('action', '{{route("update_deposit")}}/update_deposit_multicheck');
+		} else {
+			$.post($('#deposit_form').attr('action'),$('#deposit_form').serialize(),function(result){
+				if(result.status==true){
+				  toastr.success(result.msg,"Success");
+				} else{
+				  toastr.error("Somthing Went Wrong","Error");
+				}
+				$('#deposite_Modal').modal('hide');
+				location.reload(true);
+			});
+		}
+	}); 
 function getdata(){
     $('#report_table').DataTable( {
          "processing": true,
@@ -441,6 +508,7 @@ function getdata(){
                  data:{filterdata:filterdata},
                  },
          "aoColumns": [
+                     {data: 'multicheck',"searchable": false,"orderable": false},
                      {data: 'DT_RowIndex', name: 'id'},
 			 		 { data: 'created' },
                      { data: 'report_date' },
@@ -458,39 +526,48 @@ function getdata(){
                      { data: 'total_amount'},
                      { data: 'amount_paid'},
                      { data: 'remaining_amount'},
-                     { data: 'action',"searchable": false},
+                     { data: 'action',"searchable": false,"orderable": false},
                  ],
                  "columnDefs": [
-					  	  { "width": "6px", "targets": 0 },
-                          { "width": "17px", "targets": 1 },
-                          { "width": "14px", "targets": 2 },
-                          { "width": "24px", "targets": 3 },
-                          { "width": "25px", "targets": 4 },
-                          { "width": "27px", "targets": 5 },
-                          { "width": "10px", "targets": 6 },
-                          { "width": "20px", "targets": 7 },
-                          { "width": "35px", "targets": 8 },
-                          { "width": "40px", "targets": 9 },
-                          { "width": "30px", "targets": 10 },
-                          { "width": "25px", "targets": 11 },
+					  	  { "width": "3px", "targets":  0 },
+					  	  { "width": "6px", "targets":  1 },
+                          { "width": "17px", "targets": 2 },
+                          { "width": "14px", "targets": 3 },
+                          { "width": "24px", "targets": 4 },
+                          { "width": "25px", "targets": 5 },
+                          { "width": "27px", "targets": 6 },
+                          { "width": "10px", "targets": 7 },
+                          { "width": "20px", "targets": 8 },
+                          { "width": "35px", "targets": 9 },
+                          { "width": "40px", "targets": 10},
+                          { "width": "30px", "targets": 11 },
                           { "width": "25px", "targets": 12 },
                           { "width": "25px", "targets": 13 },
-                          { "width": "20px", "targets": 14 },
+                          { "width": "25px", "targets": 14 },
                           { "width": "20px", "targets": 15 },
-                          { "width": "25px", "targets": 16 },
-                          { "width": "15px", "targets": 17 },
-                   {
-					   
-                        "targets": 0,
-                        "render": function(data, type, row, meta){
-                            mb=''
-                            if(row['mobile_data']=='1'){
-                                mb='<i class="fa fa-mobile"></i>';
-                              }
-                               return mb+"&nbsp;"+data+'<br><input type="checkbox" name="reportid" value="'+row['id']+'">';
-                        }
-                    }
+                          { "width": "20px", "targets": 16 },
+                          { "width": "25px", "targets": 17 },
+                          { "width": "15px", "targets": 18 },
+						{
+						   
+							"targets": 0,
+							"render": function(data, type, row, meta){
+								   return '<input class="multicheck" type="checkbox" name="multicheck[]" value="'+row['id']+'">';
+							}
+						},
+						{
+						   
+							"targets": 1,
+							"render": function(data, type, row, meta){
+								mb=''
+								if(row['mobile_data']=='1'){
+									mb='<i class="fa fa-mobile"></i>';
+								  }
+								   return mb+"&nbsp;"+data;
+							}
+						}
                 ],
+				"aaSorting": [],
                  "rowCallback": function( row, data, index ) {
                  if(data.remaining_amount > 0)
                  {
@@ -515,9 +592,9 @@ function getdata(){
              ]      
                    
      });
-     $('.dataTables_length').append('&nbsp;<button class="btn" id="delete_reports"><i class="fa fa-trash"></i></button>'); 
+     //$('.dataTables_length').append('&nbsp;<button class="btn" id="delete_reports"><i class="fa fa-trash"></i></button>'); 
 } 
-$(document).on('click','#delete_reports',function(){
+/*$(document).on('click','#delete_reports',function(){
    var checks = $('input[type="checkbox"]:checked').map(function() {
     return $(this).val();
   }).get()
@@ -537,7 +614,7 @@ $(document).on('click','#delete_reports',function(){
          }
       })
    }
-}) 
+})*/ 
 </script>
 
 

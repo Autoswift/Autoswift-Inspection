@@ -95,4 +95,16 @@ function push_notification($firebaseToken,$title,$body)
 			return '';
 		}
 	}
+	
+	function remove_user_docs ($user) {
+		if(!empty($user->icard) && file_exists(public_path().$user->icard)) {
+			unlink(public_path().$user->icard);
+		}
+		if(!empty($user->govt_issue_id) && file_exists(public_path().$user->govt_issue_id)) {
+			unlink(public_path().$user->govt_issue_id);
+		}
+		if(!empty($user->back_govt_card) && file_exists(public_path().$user->back_govt_card)) {
+			unlink(public_path().$user->back_govt_card);
+		}
+	}
 ?>

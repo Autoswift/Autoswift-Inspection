@@ -23,7 +23,7 @@
                <li class="active">
                   <i class="fa fa-edit"></i>Valuations Initiated By
                </li>
-               <span style="float:right;"><a href="{{ route('valuation.create')}}"><i class="fa fa-plus"></i> Add Valuation Initiated By</a></span>
+               <span style="float:right;"><a target="_blank" href="{{ route('valuation.create')}}"><i class="fa fa-plus"></i> Add Valuation Initiated By</a></span>
             </ol>
          </div>
       </div>
@@ -71,7 +71,7 @@
                            @endif
                         </td>
                          <td style="text-align:left;">
-                           <a href="{{ route('valuation.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
+                           <a target="_blank" href="{{ route('valuation.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                            <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                       <div class="modal-dialog modal-sm">
@@ -133,6 +133,7 @@
 </div>
 @endsection
 @section('script')
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js">
 </script>
 <script type="text/javascript" src="https://cdn.datatables.net/rowreorder/1.2.7/js/dataTables.rowReorder.min.js"></script>
@@ -164,6 +165,32 @@ $(document).ready(function() {
         $('#result').html( 'Event result:<br>'+result );
     });
  }); 
- 
+ function statuschange(id,status){
+	if(status=='active'||status=='inactive') {
+        swal({
+			title: "Are you sure?",
+			text: "You Want Change Status !",
+			icon: "warning",
+			buttons: true,
+			dangerMode: true,
+        }).then((willDelete) => {
+			if (willDelete) {
+				if(status=='active'){
+					status='inactive';
+				}else{
+					status='active';
+				}
+				$.post("{{route('statuschange_valuation')}}",{id:id,status:status},function(result){
+					if(result.status==true) {
+						toastr.success(result.msg,"Success");
+						setTimeout(function(){ location.reload(); }, 500);
+					} else {
+						toastr.error(result.msg,"Error");
+					}
+				})
+			}
+        }); 
+    }
+}
 </script>
 @endsection

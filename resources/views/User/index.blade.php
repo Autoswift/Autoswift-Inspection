@@ -154,11 +154,24 @@ $item_id=Request::segment(3);
 				<button class="btn btn-warning reset_reference_no"> <i class="fa fa-refresh"></i> Reference No. </button>
 			</div>
 		@endif
+		<div class="col-lg-3" style="margin: 0 0 15px 5px;">
+			@php
+			$muticheckAction = route('multicheck_action_user');
+			@endphp
+        	{!! Form::Label('multicheck_action', 'Multi Check Action:') !!}
+			<select id="multicheck_action" onclick="multicheck_action('{{ $muticheckAction}}');" name="item_id">
+				<option value="none" selected="selected">None</option>
+				<option value="active" toast-text="Do you want the activate selected users?">Active</option>
+				<option value="inactive" toast-text="Do you want the inactive selected users?">Inactive</option>
+				<option value="delete" toast-text="Do you want the deleted selected users?">Delete</option>
+				<option value="rejected" toast-text="Do you want the rejected selected users?">Rejected</option>
+			</select>
+		</div>
 		<div class="col-lg-2" style="margin: 0 0 15px 5px;">
         	{!! Form::Label('Status', 'Status:') !!}
          	{!! Form::select('item_id',['all'=>'All','active'=>'Active','inactive'=>'Inactive','pending'=>'Pending','requested'=>'Requested'],$item_id, ['id' => 'fillter']) !!}
 		</div>
-		<div class="col-lg-6" style="margin: 0 0 15px 5px;">
+		<div style="margin: 0 0 15px 5px;">
 			@php
 			$firstItem = array('all' => 'All');
 			$company = $firstItem + $company;
@@ -174,6 +187,7 @@ $item_id=Request::segment(3);
                <table class="table table-bordered table-hover table-striped" style="width: 99.9%">
                   <thead>
                      <tr class="header-titles">
+                        <th style="text-align:left;" width="40px"><input type="checkbox" id="multicheck"></th>
                         <th style="text-align:left;" width="40px">S.No.</th>
                         <th>ID</th>
                         @if($role=='mobile_admin'||$role=='mobile_executive'||$role=='company_user')
@@ -236,7 +250,12 @@ $item_id=Request::segment(3);
                      $i++;
                      @endphp
                      <tr>
-                        <td style="text-align:left;"  width="20px">{{$i}}</td>
+                        <td style="text-align:left;" width="20px">
+							@if($val->status!='requested')
+								<input type="checkbox" name="multicheck[]" value="{{$val->id}}" class="multicheck">
+							@endif
+						</td>
+                        <td style="text-align:left;" width="20px">{{$i}}</td>
                        	<td>{{$val->id}}</td>
 						@if($role=='mobile_admin'||$role=='mobile_executive'||$role=='company_user')
                         <td>{{$val->valuation?$val->valuation->name:'N/A'}}</td>
@@ -401,47 +420,51 @@ $item_id=Request::segment(3);
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.html5.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
+<script type="text/javascript" src="{{ asset('js/multicheck.js') }}"></script>
 <script type="text/javascript">
-$(document).ready(function(){
-	$(document).on('click', '.zoom', function() {
-        $(this).toggleClass('transition');
-    });
-});
-   header=$.trim($('#page-header').text());
+	header=$.trim($('#page-header').text());
 	user="{{Auth()->user()->role}}";
 	var hideTargets = [];
 	if('{{$role}}'=='mobile_executive') {
-		hideTargets = [3,14,15,16,17];
+		hideTargets = [4,15,16,17,18];
 	}
 	var usertable = $('.table-hover').DataTable({
-      pageLength: 50,
-      lengthMenu: [[50,100,500,1000], [50,100,500,1000]],
-      dom: 'Blfrtip',
-			 buttons: [
-             {
-                 extend: 'excel',
-                 title: header,
-                 exportOptions: {
-                     columns: ':visible'
-                 }
-             },
-			 {
-			extend : 'colvis',
+		pageLength: 50,
+		lengthMenu: [[50,100,500,1000], [50,100,500,1000]],
+		dom: 'Blfrtip',
+			buttons: [
+            {
+                extend: 'excel',
+                title: header,
+                exportOptions: {
+                    columns: ':visible'
+                }
+            },
+			{
+				extend : 'colvis',
 				text : '<i class="fa fa-eye"></i> Column Visibility'
 			}
          ],
-         columnDefs: [ {
-             targets:hideTargets,
-             visible: false
-         } ]
+        columnDefs: [
+			{
+				targets:hideTargets,
+				visible: false,
+			},
+			{
+				"targets": 0,
+				"orderable": false
+			} 		
+		],
+		"aaSorting": []
     }).buttons().container().appendTo(".breadcrumb");
    
 	$("#ExportReporttoExcel").on("click", function() {
 		$('.table-hover').DataTable().buttons(0,0).trigger();
 	});
    
-    route="{{\Request::route()->getName()}}"
-    $('#fillter, #company_filter').change(function(){
+    route="{{\Request::route()->getName()}}";
+	
+	$('#fillter, #company_filter').change(function(){
 		var redirectUrl = '';
 		if(route!='userfill'){
 			redirectUrl = "{{route('users.index')}}"+'/'+$('#fillter').val();
@@ -536,7 +559,7 @@ $(document).ready(function(){
 	*/
 
 	
-    function statuschange(id,status){
+function statuschange(id,status){
       user="{{Auth()->user()->role}}";
       if(user!=1){
          toastr.error("This action is unauthorized");
@@ -546,33 +569,32 @@ $(document).ready(function(){
 		  toastr.info("You cannot change status");
 		return false;
 	  }
-     if(status=='active'||status=='inactive'){
-         swal({
-           title: "Are you sure?",
-           text: "You Want Change Status !",
-           icon: "warning",
-           buttons: true,
-           dangerMode: true,
-         })
-         .then((willDelete) => {
-         if (willDelete) {
-           if(status=='active'){
-             status='inactive';
-           }else{
-             status='active';
-           }
-           $.post("{{route('statuschange')}}",{id:id,status:status},function(result){
-               if(result.status==true){
-                 toastr.success(result.msg,"Success");
-                 setTimeout(function(){ location.reload(); }, 500);
-                 } else{
-                 toastr.error(result.msg,"Error");
-               }
-           })
-         }
-         }); 
-       }
-     if(status=='pending'){
+    if(status=='active'||status=='inactive') {
+        swal({
+			title: "Are you sure?",
+			text: "You Want Change Status !",
+			icon: "warning",
+			buttons: true,
+			dangerMode: true,
+        }).then((willDelete) => {
+			if (willDelete) {
+				if(status=='active'){
+					status='inactive';
+				}else{
+					status='active';
+				}
+				$.post("{{route('statuschange')}}",{id:id,status:status},function(result){
+					if(result.status==true) {
+						toastr.success(result.msg,"Success");
+						setTimeout(function(){ location.reload(); }, 500);
+					} else {
+						toastr.error(result.msg,"Error");
+					}
+				})
+			}
+        }); 
+    }
+    if(status=='pending'){
        swal("Please Choose Option", {
 		   buttons: {
 			 cancel: "Cancel",
@@ -586,25 +608,26 @@ $(document).ready(function(){
 			   value: "defeat",
 			 },
 		   },
-		 })
-		 .then((value) => {
-			 if(value=='catch'){
-			   status='active';
-			 }
-			 if(value=='defeat'){
-			   status='requested';
-			 }
-			 $.post("{{route('statuschange')}}",{id:id,status:status},function(result){
-					if(result.status==true){
-					 toastr.success(result.msg,"Success");
-					 setTimeout(function(){ location.reload(); }, 500);
-					 } else{
-					 toastr.error(result.msg,"Error");
-				   }
-			   })
-		   });
-     	} 
-    }
+		 }).then((value) => {
+			if(value){
+				if(value=='catch'){
+				status='active';
+				}
+				if(value=='defeat'){
+				status='requested';
+				}
+				$.post("{{route('statuschange')}}",{id:id,status:status},function(result){
+				if(result.status==true){
+				toastr.success(result.msg,"Success");
+				setTimeout(function(){ location.reload(); }, 500);
+				} else{
+				toastr.error(result.msg,"Error");
+				}
+				});
+			}
+		});
+    } 
+}
 	user="{{Auth()->user()->role}}";
       if(user!=1){
          $('.buttons-excel').hide();

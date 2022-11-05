@@ -1,4 +1,7 @@
 <script src="{{ asset('js/jquery.easydrag.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js"></script>
+<script type="text/javascript" src="{{ asset('js/zoom.jquery.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('css/jquery.zoom.css') }}">
 <div id="dragable" style="padding: 5px 0 0 5px; position:absolute;left:800px;top:150px;display:none;">
 	<button style="float: right;" type="button" class="dragclose"><span aria-hidden="true">&times;</span></button>
 	<div id="dragImage"></div>
@@ -7,11 +10,23 @@
 		<button id="nextButton" style="float: right;">&gt;</button>
 	</div>
 </div>
-<script type="text/javascript"> 
+<script type="text/javascript">
+let zoomMap = $('#dragImage').ZoomArea({
+        zoomLevel: 1,
+        minZoomLevel: 1,
+        maxZoomLevel: 15,
+        parentOverflow: 'auto',
+        exceptionsZoom: ['marker-all'],
+        hideWhileAnimate: ['map-area', 'marker-all'],
+        externalIncrease: '.map-control-zoomin',
+        externalDecrease: '.map-control-zoomout',
+        virtualScrollbars: false,
+        usedAnimateMethod: 'jquery'
+    }); 
 $(document).ready(function(){
 	var activeZoomImage = '';
 	$(document).on('click', 'img[class^=zoom]', function() {
-        $('#dragable').toggleClass('transition');
+        //$('#dragable').toggleClass('transition');
     });
 	
 	$(document).on('click', '#prevButton', function() {
@@ -49,6 +64,9 @@ $(document).ready(function(){
 		});
 		if(j > 0) {
 			activeZoomImage = 1;
+			var position = $(this).offset();
+			var mtop = position.top-250;
+			$("#dragable").css({"top":mtop});
 			$("#dragable").show();
 		}
 	});

@@ -42,7 +42,7 @@ class UserController extends Controller
 		$role = $roles[$role_id];
 		$roles = array($role_id => $role);
         $this->authorize('isSuper');
-        $company = Valuation::orderBy('name')->pluck('name', 'id');
+        $company = Valuation::where('status', '=', 'active')->orderBy('name')->pluck('name', 'id');
         $state = State::pluck('name', 'id');
         return view('User.create',compact('company','state', 'roles', 'role', 'role_list_page'));
     }
@@ -56,30 +56,31 @@ class UserController extends Controller
     protected function store(Request $request)
     { 
         $this->authorize('isSuper');
-        $request->validate([
+		$messages = [
+			'pass1.required' => 'The password field is required.',
+			'employee_id.required' => 'The reference number field is required.',
+		];
+		$validateArr = [];
+        $validateArr = [
             'role' => 'required',
             'name' => 'required|string|max:255',
             'pass1' => 'required|string',
             'username'=>'required|string|unique:users',
             'mobile_number'=>'required',
             'state'=>'required',
-            'area_id'=>'required',
-        ]);
+            'area_id'=>'required'
+        ];
+		
         if($request->role==1||$request->role==2||$request->role==3||$request->role==4){
-           $request->validate([
-            'employee_id' => 'required',
-            ]); 
+			$validateArr['employee_id'] = 'required';
         }
-        if($request->email){
-           $request->validate([
-            'email' => 'required|string|email|max:255|unique:users',
-            ]); 
+        if($request->email) {
+			$validateArr['email'] = 'required|string|email|max:255|unique:users';			
         }
-        if($request->role==3||$request->role==4||$request->role==5){
-           $request->validate([
-            'comp_id' => 'required',
-            ]); 
+        if($request->role==3||$request->role==4||$request->role==5) {
+			$validateArr['comp_id'] = 'required';
         }
+		$request->validate($validateArr, $messages); 
         $input=$request->all();
         if($request->role==3||$request->role==4){
             $input['status']='requested';
@@ -197,33 +198,32 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $this->authorize('isSuper');
-        $request->validate([
-            'role' => 'required',
+		$messages = [
+			'pass1.required' => 'The password field is required.',
+			'employee_id.required' => 'The reference number field is required.',
+		];
+		$validateArr = [];
+        $validateArr = [
+           'role' => 'required',
             'name' => 'required|string|max:255',
             'pass1' => 'required|string',
             'username'=>'required|string|unique:users,username,'.$id,
             'mobile_number'=>'required',
             'state'=>'required',
-            'area_id'=>'required',
-        ]);
-        if($request->role==1||$request->role==2||$request->role==3||$request->role==4){
-           $request->validate([
-            'employee_id' => 'required',
-            ]); 
+            'area_id'=>'required'
+        ];
+        if($request->role==1||$request->role==2||$request->role==3||$request->role==4) {
+			$validateArr['employee_id'] = 'required';
         }
         if($request->email){
-           $request->validate([
-            'email' => 'required|string|email|max:255|unique:users,email,'.$id,
-            ]); 
+			$validateArr['email'] = 'required|string|email|max:255|unique:users,email,'.$id; 
         }
-        if($request->role==3||$request->role==4||$request->role==5){
-           $request->validate([
-            'area_id' => 'required',
-            'comp_id' => 'required',
-            ]); 
+        if($request->role==3||$request->role==4||$request->role==5) {
+			$validateArr['area_id'] = 'required';			
+			$validateArr['comp_id'] = 'required';			
         }
+		$request->validate($validateArr, $messages);
         $input=$request->all();
-		
 		$data = User::findOrFail($id);
 		if($request->role != 4) {
 			$optimizePath = config('global.employees_main_folder').$id.'/';
@@ -356,6 +356,31 @@ class UserController extends Controller
         }
         return Response()->json($arr);
     }
+	
+	public function multicheck_action(Request $request){
+        $request->validate([
+            'action' => 'required',
+			'multicheck' => 'required'
+        ]);
+		$arr = array('status' => false,'action'=>'Submited','msg' => 'Somthing Went Wrong');
+		if(in_array($request->action, ['active', 'inactive', 'delete', 'rejected'])) {
+			if($request->action == 'delete') {
+				foreach($request->multicheck as $key => $user_id) {
+					$user = User::findOrFail($user_id);
+					remove_user_docs($user);
+					if($user->delete()) {
+						$arr = array('status' => true,'action'=>'Submited','msg' => 'User(s) deleted successfully');
+					}
+				}
+			} else {
+				if(User::whereIn('id', $request->multicheck)->update(['status'=>$request->action])){
+					$arr = array('status' => true,'action'=>'Submited','msg' => 'User(s) status changed successfully');
+				}
+			}
+		}
+        return Response()->json($arr);
+    }
+	
     public function documents(Request $request){
         if($request->ajax()){
             $data = User::select('icard','govt_issue_id','back_govt_card')->whereId($request->user_id)->first();

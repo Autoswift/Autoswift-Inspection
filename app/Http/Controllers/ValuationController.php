@@ -168,4 +168,15 @@ class ValuationController extends Controller
              return $arr = array('status' => false,'action'=>'post','msg'=>'Somthing went Wrong');
          }
     }
+	
+	public function change_status(Request $request){
+        if($request->ajax()){
+            $data = Valuation::findOrFail($request->id);
+            $data=$data->update(array('status'=>$request->status));
+            if($data){
+                $arr = array('status' => true,'action'=>'update','msg' => 'Status Change Successfully');
+            }
+            return Response()->json($arr);
+        }
+    }
 }

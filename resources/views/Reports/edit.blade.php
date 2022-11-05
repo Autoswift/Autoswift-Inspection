@@ -19,20 +19,20 @@
    font-weight:500;
    color:#000000;
    }
-   #sortable { 
+   .sortable { 
    list-style-type: none; 
    margin: 0; 
    padding: 0; 
    width: 100%; 
    }
-   #sortable li { 
+   .sortable li { 
    margin: 3px 3px 3px 0; 
    padding: 1px; 
    float: left; 
    border: 0;
    background: none;
    }
-   #sortable li img{
+   .sortable li img{
    width: 250px;
    height: 140px;
    }
@@ -105,7 +105,7 @@
                </li>
                <span style="float:right;"><a href="{{ URL::previous() }}"><i class="fa fa-arrow-left"></i> Back</a></span>
                @if($finance->pdf_file!=null && $finance->pdf_file!='')
-              <span style="float:right;"><a href="{{asset('finance/pdf/'.$finance->pdf_file)}}" style="color: #28c76f;margin-right: 30px;font-weight: 600;" target="_blank">Click to Open PDF<i class="fa fa-file-pdf-o"></i></a></span>
+              <span style="float:right;"><a class="openPdf" href="{{asset($finance->pdf_file)}}" style="color: #28c76f;margin-right: 30px;font-weight: 600;" target="_blank">Click to Open PDF<i class="fa fa-file-pdf-o"></i></a></span>
               @endif
               <span style="float:right;">Created At : {{date('d-m-Y h:i:s',strtotime($finance->created_at))}} | {{$finance->mobile_data?'Mobile':'Web'}} &nbsp;&nbsp;</span>
             </ol>
@@ -117,7 +117,17 @@
       <form class="form" novalidate enctype="multipart/form-data" method="POST" id="addreport" action="{{route('report.update',$finance->id)}}">
          @csrf
          @method('PUT')
-         <button type="submit" class="btn mr-1 mb-1 waves-effect waves-light" style="color: #fff; background-color:#4839EB;" id="savepdf" name="pdf" value="pdf">Save as Pdf</button>
+		 <select name="pdf" id="savepdf">
+			<option value="">Save as Pdf</option>
+			@foreach(config('global.pdf_types') as $pdf_type => $pdf_name)
+				<optgroup label="{{ $pdf_name }}">
+				@foreach($headers as $harr)
+					<option value="{{ $harr->id.'***'.$pdf_type }}">{{ $harr->authorizer_name.' ('.$harr->report_heading.')' }}</option>
+				@endforeach
+				</optgroup>
+			@endforeach
+		 </select>
+         <!--<button type="submit" class="btn mr-1 mb-1 waves-effect waves-light" style="color: #fff; background-color:#4839EB;" id="savepdf" name="pdf" value="pdf">Save as Pdf</button>-->
          <div class="row" style="padding: 30px 0 0 0 ;">
             <div class="col-md-4 col-12">
                <span>Reference No.</span>
@@ -1148,7 +1158,60 @@
                   <a href="javascript:generatezip()" class="btn btn-primary waves-effect waves-light">Zip Photo</a>
                </div>
             </div>
-            <div class="col-md-2 col-12">
+			
+			<div class="row">
+				<div class="col-md-2 col-12">
+					<span>User or Chassis Photos</span>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Chassis Impression Photo</label>
+					<div class="form-group">
+						<input id="upload" type="file" name="upload" style="background-color: #337ab7; color: #fff" class="form-control image" accept="image/*">
+					</div>
+					<div class="profile-header mb-2">
+						<div class="relative ">
+							@if($finance-> chachees_number_photo)
+								<div class="imagechachees0"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$finance->chachees_number_photo}}","chachees0","chachees")>Remove</a></li><li><a href="#" onclick=rotate("{{$finance->chachees_number_photo}}","right","previewimage")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$finance->chachees_number_photo}}","left","previewimage")><i class="fa fa-rotate-left"></i></a></li></ul></div><img id="previewimage" src="{{asset($finance->chachees_number_photo)}}" style="width: 310px; height: 175px;"><div style="text-align: center;"></div></div>
+							@else
+								<img id="previewimage" style="width: 310px; height: 175px;margin-top: 35px;">
+							@endif
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Front Side Photo</label>
+					<div class="form-group">
+						<input id="front_side_photo" type="file" name="front_side_photo" style="background-color: #337ab7; color: #fff" class="form-control image" accept="image/*">
+					</div>
+					<div class="profile-header mb-2">
+						<div class="relative ">
+							@if($finance-> front_side_photo)
+								<div class="imagefrontsidephoto0"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$finance->front_side_photo}}","frontsidephoto0","frontsidephoto")>Remove</a></li><li><a href="#" onclick=rotate("{{$finance->front_side_photo}}","right","front_side_photo_preview")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$finance->front_side_photo}}","left","front_side_photo_preview")><i class="fa fa-rotate-left"></i></a></li></ul></div><img id="front_side_photo_preview" src="{{asset($finance->front_side_photo)}}" style="width: 310px; height: 175px;"><div style="text-align: center;"></div></div>
+							@else
+								<img id="front_side_photo_preview" style="width: 310px; height: 175px;margin-top: 35px;">
+							@endif
+						</div>
+					</div>
+				</div>
+				@if($finance->mobile_data)
+					<div class="col-md-3 col-12">
+						<label>Selfi Photo</label>
+						<div class="form-group">&nbsp;</div>
+						<div class="profile-header mb-2">
+							<div class="relative ">
+								@if($finance->selfie)
+									<img src="{{asset('finance/')}}/{{$finance->selfie}}" style="width: 253px; height: 141px;">
+								@endif
+							</div>
+						</div>
+					</div>
+				@endif
+			</div>
+			
+			
+			
+			
+            <?php /*<div class="col-md-2 col-12">
                <span>Chassis Impression Photo
                </span>
             </div>
@@ -1180,42 +1243,24 @@
                   </div>
                </div>
             </div>
-            @endif
+            @endif */ ?>
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
             <div class="col-md-2 col-12">
-               <span>Photo
-               </span>
+               <span>Permanent Photos ({{config('global.max_permanent_photos')}} Max.)</span>
             </div>
-            <div class="col-md-4 col-12">
-               <div class="form-group">
-                  <input id="uploadPhoto" type="file" 
-                     name="uploadPhotos[]"  style="background-color: #337ab7; color: #fff;"
-                     class="form-control" accept="image/*"
-                     multiple="multiple">
-               </div>
-            </div>
+			@php
+			$photo_types = config('global.photo_types')
+			@endphp
+            @include('Reports.upload_photos_common', ['photo_type' => $photo_types[0]])
             <div class="col-md-12 col-12">
-               <div class="profile-header" >
-                  <div class="relative" id='uploadImageMultiapl'>
-                     <div class="row" id="listImages">
-                     </div>
-                     <ul id="sortable" >
-                        @php 
-                           $photo=json_decode($finance->photo);
-                           $approve_photo=(array)json_decode($finance->approve_photo);
-                        @endphp
-                        @if($photo)
-                           @foreach($photo as $key=>$item)
-                        <li class="ui-state-default image{{$key}}" id="image_{{$item}}"><div><ul class="photo-remove"><li><a href="#" onclick=removimg("{{$item}}","{{$key}}","photo")>Remove</a></li><li><a href="#" onclick=rotate("{{$item}}","right","photo_{{$key}}")><i class="fa fa-rotate-right"></i></a></li><li><a href="#" onclick=rotate("{{$item}}","left","photo_{{$key}}")><i class="fa fa-rotate-left"></i></a></li></ul></div><img src="{{asset($item)}}" title="{{$item}}" id="photo_{{$key}}"><div style="text-align: center;"><input type="checkbox" name="approve_photo[]" class="approve-check" value="{{$item}}" @if(in_array($item,$approve_photo)) checked @endif></div>
-                        </li>
-                           @endforeach
-                        @endif
-                     </ul>
-                  </div>
-               </div>
+               &nbsp;
             </div>
+            <div class="col-md-2 col-12">
+               <span>Temporary Photos</span>
+            </div>
+            @include('Reports.upload_photos_common', ['photo_type' => $photo_types[1]])
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
@@ -1255,6 +1300,7 @@
             @php
             if($finance->videos){
                $video=json_decode($finance->videos, 1);
+               $approve_video=json_decode($finance->approve_video, 1);
 			   //prd($video);
             }
             @endphp
@@ -1263,21 +1309,21 @@
 				@if(!empty($video[0]))
 					<a href="#" onclick=removimg("{{$video[0]}}","0","videos")>Remove</a><br>
 					<video id="video1" width="320" height="240" controls src="{{asset($video[0])}}"></video>
-					<p><b>Video-1</b></p>
+					<div style="text-align: center;"><input type="checkbox" name="approve_video[]" class="approve-check" value="0" @if(in_array(0,$approve_video)) checked @endif></div>
 				@endif
             </div>
             <div class="col-md-3 col-12 videos1">
 				@if(!empty($video[1]))
 					<a href="#" onclick=removimg("{{$video[1]}}","1","videos")>Remove</a><br>
 					<video  id="video2" width="320" height="240" controls src="{{asset($video[1])}}"></video>
-					<p><b>Video-2</b></p>
+					<div style="text-align: center;"><input type="checkbox" name="approve_video[]" class="approve-check" value="1" @if(in_array(1,$approve_video)) checked @endif></div>
 				@endif
             </div>
             <div class="col-md-3 col-12 videos2">
 				@if(!empty($video[2]))
 					<a href="#" onclick=removimg("{{$video[2]}}","2","videos")>Remove</a><br>
 					<video  id="video2" width="320" height="240" controls src="{{asset($video[2])}}"></video>
-					<p><b>Video-3</b></p>
+					<div style="text-align: center;"><input type="checkbox" name="approve_video[]" class="approve-check" value="2" @if(in_array(2,$approve_video)) checked @endif></div>
 				@endif
             </div>
 			
@@ -1466,66 +1512,112 @@
             </div>
             {!! Form::close() !!}
          </div>
-      </div>
+      </div> 
 @include('layouts.custom_image_slider')
 @endsection
-@section('script')      
+@section('script')	
 <script src="https://cdnjs.cloudflare.com/ajax/libs/imgareaselect/0.9.10/js/jquery.imgareaselect.pack.js"></script>
 <script type="text/javascript" src="https://www.arvindampro.in/app-assets/croppie.js"></script>
 <script type="text/javascript" src="https://www.arvindampro.in/app-assets/js/scripts/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="https://www.arvindampro.in/app-assets/js/scripts/sweetalert.min.js"></script>
 <script type="text/javascript">
+$('#savepdf').val('');
 var dp_rg=0;
 var dp_ch=0;
 var dp_eg=0;
 var grid_pdf;
 var count = 0;   
 $(document).ready(function(){
+	@if(session::has('with_pdf'))
+		@if(session('with_pdf') == 'yes')
+			$('.openPdf')[0].click();
+		@endif
+	@endif
 	table=$('#DataTables_Table_9').DataTable({
 		pageLength: 50,
 		lengthMenu: [[50,100,500,1000], [50,100,500,1000]],
     });
    
-   $( ".pickadate" ).prop('autocomplete','off');
+	$( ".pickadate" ).prop('autocomplete','off');
 
-   $("#report_date,#inspection_date").datepicker({
+	$("#report_date,#inspection_date").datepicker({
         dateFormat: 'dd-mm-yy',
-        
-   });
-   $('#registration_date').datepicker({
-      dateFormat: 'dd-mm-yy',
-      editable: true, 
-      constrainInput: false,
-   })
-   endDate = $('#report_date').datepicker('getDate'); 
-   $("#inspection_date").datepicker("option", "maxDate", endDate); 
-   $('#report_date').on('change',function(){
-        endDate = $('#report_date').datepicker('getDate'); 
+	});
+	$('#registration_date').datepicker({
+		dateFormat: 'dd-mm-yy',
+		editable: true, 
+		constrainInput: false,
+	});
+	endDate = $('#report_date').datepicker('getDate'); 
+	$("#inspection_date").datepicker("option", "maxDate", endDate); 
+	$('#report_date').on('change',function(){
+		endDate = $('#report_date').datepicker('getDate'); 
         $("#inspection_date").datepicker("option", "maxDate", endDate); 
-   })
-   $('#amount_paid,#total_amount').on('change',function(){
-        rm_amouint= parseInt($('#total_amount').val())-parseInt($('#amount_paid').val())
+	});
+	$('#amount_paid,#total_amount').on('change',function(){
+		rm_amouint= parseInt($('#total_amount').val())-parseInt($('#amount_paid').val())
         $('#remaining_amount').val(rm_amouint)
-      })
+    });
     $('button[type=submit]').click(function(){
-     window.setTimeout(function () {
+		window.setTimeout(function () {
             var errors = $('.error')
             if (errors.length) {
                 $('html, body').animate({ scrollTop: errors.offset().top - 50}, 500);
             }
-      }, 0);
-   })
-   $('input[type=text]').keyup(function () {
-      if($(this).attr('id')!='general_comment'){
-         this.value = this.value.toUpperCase();
-      }
-   })
-   $('form').trigger('change');
+		}, 0);
+	});
+	$('#savepdf').on('change', function(){
+		if($(this).val()) {
+			window.setTimeout(function () {
+				var errors = $('.error')
+				if (errors.length) {
+					$('html, body').animate({ scrollTop: errors.offset().top - 50}, 500);
+				} else {
+					$('#addreport').submit();
+				}
+			}, 0);
+		}
+	});
+	$(".uploadPhoto").change(function() {
+		var photo_type = $(this).attr('rel');
+		if(photo_type == 'permanent') {
+			var sortableCount = $('ul#sortable_'+photo_type+' li.ui-state-default').length;
+			var newImageCount = this.files.length;
+			if((sortableCount+newImageCount) > "{{config('global.max_permanent_photos')}}"){
+				alert('You have already exceed max limit.');
+				$(this).val(null);
+				return false;
+			}
+		}
+		readMultipleURL(this);
+	});
+	
+	function readMultipleURL(input) {
+		var photo_type = $(input).attr('rel');
+		$('#listImages_'+photo_type).empty();
+		for (var i = 0; i < input.files.length; i++) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				$('#listImages_'+photo_type).append('<div class="col-md-2 col-12"><img src="' + e.target.result + '"class="img-fluid mb-4"/></div>');
+			}
+			reader.readAsDataURL(input.files[i]);
+		}
+	}
+	
+	$('input[type=text]').keyup(function () {
+		if($(this).attr('id')!='general_comment'){
+			this.value = this.value.toUpperCase();
+		}
+	});
+	
+	$('form').trigger('change');
+	
     $.ajaxSetup({
-         headers: {
-             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-         }
-   });
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+	});
+	
       $image_crop = $('#image_demo').croppie({
               enableExif: true,
               viewport: {
@@ -1538,6 +1630,13 @@ $(document).ready(function(){
                   height: 300
               }
           });
+		  
+			front_side_photo.onchange = evt => {
+				const [file] = front_side_photo.files
+				if (file) {
+					front_side_photo_preview.src = URL.createObjectURL(file)
+				}
+			}
       
           $('#upload').on('change', function() {
               var reader = new FileReader();
@@ -1560,41 +1659,11 @@ $(document).ready(function(){
                   $('form').append('<input type="hidden" name="ch_upload" value='+response+'>');   
               })
           });
-          $("#uploadPhoto").change(function() {
-              readMultipleURL(this);
-          });
 		$('#previewimage').click(function (){
 				var imgSrc = $(this).attr('src');
 				window.open(imgSrc,"","width=550,height=170,left=150,top=200,toolbar=0,status=0,");
 		});
-		  
-          function readMultipleURL(input) {
-              $('#listImages').empty();
-              for (var i = 0; i < input.files.length; i++) {
-                  var reader = new FileReader();
-                  reader.onload = function(e) {
-                      $('#listImages').append('<div class="col-md-2 col-12"><img src="' + e.target.result + '"class="img-fluid mb-4"/></div>');
-                  }
-                  reader.readAsDataURL(input.files[i]);
-              }
-          } 
-      $("#sortable").sortable({
-              update: function(e) {
-                  var imageids_arr = [];
-                  $('#sortable .ui-state-default').each(function() {
-                      id = $(this).attr('id');
-                      split_id = id.split("_");
-                      imageids_arr.push(split_id[1]);
-                  });
-                  $.post("{{route('image_reorder')}}",{id:"{{$finance->id}}",imageids_arr:imageids_arr},function(result){
-                     if (result.status == true) {
-                        toastr.success(result.msg, "success");
-                     } else {
-                        toastr.error(result.msg, "Error");
-                     }
-                  })
-              }
-          });
+		
       $('#reject_form').submit(function() {
          return confirm("Are you sure that you want to Reject Report?");
       });
@@ -1672,7 +1741,7 @@ function rotate(img,pos,photoId){
 		}
 	})
 }
-function removimg(id, ii, image_type) {
+function removimg(id, ii, image_type, photo_type = null) {
           event.preventDefault();
 		if(image_type == 'videos') {
 			var swaltoast = "You Want  Remove Video! it's Permanently Deleted";
@@ -1688,7 +1757,7 @@ function removimg(id, ii, image_type) {
               })
               .then((willDelete) => {
                   if (willDelete) {
-                     $.post("{{route('image_remove')}}",{id:"{{$finance->id}}",image: id,image_type:image_type},function(result){
+                     $.post("{{route('image_remove')}}",{id:"{{$finance->id}}",image: id,image_type:image_type,photo_type:photo_type},function(result){
                         if (result.status == true) {
                            toastr.success(result.msg, "success");
                         } else {
@@ -1698,9 +1767,11 @@ function removimg(id, ii, image_type) {
 							$('.videos' + ii).empty();
 						} else {
 							if(image_type == 'chachees') {
-								$('.image' + ii).html('<img id="previewimage" style="width: 253px; height: 141px;">');
+								$('.image' + ii).html('<img id="previewimage" style="width: 310px; height: 175px;margin-top: 35px;">');
+							} else if(image_type == 'frontsidephoto') {
+								$('.image' + ii).html('<img id="front_side_photo_preview" style="width: 310px; height: 175px;margin-top: 35px;">');
 							} else {
-								$('.image' + ii).empty();
+								$('.image' + ii).remove();
 							}
 						}
                      })

@@ -61,7 +61,7 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('staff_position','StaffController@staff_position')->name('staff_position');
 		Route::post('multiple_delete','FinanceController@multiple_delete')->name('multiple_delete');
 		Route::post('rejected_delete','FinanceController@rejected_delete')->name('rejected_delete');
-		Route::match(['get','put'],'update_deposit/{id?}','FinanceController@update_deposit')->name('update_deposit');
+		Route::match(['get','put', 'post'],'update_deposit/{id?}','FinanceController@update_deposit')->name('update_deposit');
 		Route::get('today_report_excel','FinanceController@today_report_excel')->name('today_report_excel');
 		Route::post('delete_rejected/{id?}','FinanceController@delete_rejected')->name('delete_rejected');
 		Route::post('pdf_remove','ValuationController@pdf_remove')->name('pdf_remove');
@@ -92,8 +92,11 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('users/image','UserController@image')->name('updateimage');
 		Route::post('/changerefer','UserController@changereferno')->name('changereferno');
 		Route::post('/changerolerefer','UserController@changerolereferno')->name('changerolereferno');
+		Route::post('/multicheck_action_user','UserController@multicheck_action')->name('multicheck_action_user');
+		Route::post('/multicheck_action_report','FinanceController@multicheck_action')->name('multicheck_action_report');
 		Route::post('documents','UserController@documents')->name('document');
 		Route::post('statuschange','UserController@change_status')->name('statuschange');
+		Route::post('statuschange_valuation','ValuationController@change_status')->name('statuschange_valuation');
 		Route::get('make_users_zip/{id?}','UserController@make_users_zip')->name('make_users_zip');		
 		Route::get('getstatearea','AreaController@getstatearea');
 		Route::resource('staff','StaffController');

@@ -36,7 +36,7 @@ class StateController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|string|max:255|unique:states,name'
         ]);
         $input = $request->all();
         $data = state::create($input);
@@ -79,7 +79,7 @@ class StateController extends Controller
     {
        
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|string|max:255|unique:states,name,'.$state->id
         ]);
         $input = $request->all();   
         $data = State::findOrFail($id);

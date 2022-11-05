@@ -21,7 +21,7 @@
                 <li class="active">
                   <i class="fa fa-edit"></i> States-Cities
                </li>
-               <span style="float:right;"><a href="{{ route('area.create')}}"><i class="fa fa-plus"></i> Add City Or Area</a></span>
+               <span style="float:right;"><a target="_blank" href="{{ route('area.create')}}"><i class="fa fa-plus"></i> Add City Or Area</a></span>
                <span style="float:right;"><a href="{{ route('area_excel')}}" style="color: #28c76f;margin-right: 30px;font-weight: 600;"><i class="fa fa-file-excel-o"></i>Export Excel</a></span>
             </ol>
          </div>
@@ -78,7 +78,7 @@
                          <td>{{$val->state_name}}</td>
                          <td>{{$val->name}}</td>
                          <td>
-                           <a href="{{ route('area.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
+                           <a target="_blank" href="{{ route('area.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                            <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                       <div class="modal-dialog modal-sm">

@@ -10,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use Illuminate\Validation\Rule;
 
 class AreaController extends Controller
 {
@@ -51,8 +52,11 @@ class AreaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'state_id'=>'required'
+            'state_id'=>'required',
+			'name' => [
+				'required', 
+				Rule::unique('areas')->where('name', $request->name)->where('state_id', $request->state_id)
+			]
         ]);
         $input = $request->all();
         $message = '';
@@ -116,8 +120,11 @@ class AreaController extends Controller
         }
          
         $request->validate([
-            'name' => 'required',
-            'state_id'=>'required'
+            'state_id'=>'required',
+			'name' => [
+				'required', 
+				Rule::unique('areas')->where('name', $request->name)->where('state_id', $request->state_id)->ignore($area->id)
+			]
         ]);
         $input = $request->all();   
         $data = Area::findOrFail($area->id);

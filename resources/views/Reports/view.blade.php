@@ -356,7 +356,7 @@ function generatepdf(){
    $.post("{{route('make_pdf')}}",{report_id:"{{$finance->id}}"},function(result){
      if (result.status == true) {
           toastr.success(result.msg, "success");
-          window.open("{{asset('finance/pdf/')}}/"+result.file, '_blank');
+          window.open("{{asset('')}}/"+result.file, '_blank');
        } else {
           toastr.error(result.msg, "Error");
        }

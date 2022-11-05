@@ -253,8 +253,9 @@ ul.alert-dropdown {
 	cursor:pointer;
 }
 
-#dragImage {
+#dragImage #dragImage {
 	border: 15px solid #000;
+	border-radius: 10px;
 }
 .buttons-columnVisibility span {color:#fff;}
 .open_photo_slider { cursor:pointer; }

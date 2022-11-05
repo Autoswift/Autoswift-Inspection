@@ -19,7 +19,7 @@
                <li class="active">
                   <i class="fa fa-edit"></i>Autoswift Grid
                </li>
-                <span style="float:right;"><a href="{{ route('grid.create')}}"><i class="fa fa-plus"></i> Add Grid</a></span>
+                <span style="float:right;"><a target="_blank" href="{{ route('grid.create')}}"><i class="fa fa-plus"></i> Add Grid</a></span>
                 <span style="float:right;"><a href="{{ route('grid_excel')}}" style="color: #28c76f;margin-right: 30px;font-weight: 600;"><i class="fa fa-file-excel-o"></i>Export Excel</a></span>
             </ol>
          </div>
@@ -103,7 +103,7 @@
                          <td>{{$val->note}}</td>
                          <td>{{date('d-m-Y',strtotime($val->updated_at))}}</td>
                          <td style="text-align:left;">
-                           <a href="{{ route('grid.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
+                           <a target="_blank" href="{{ route('grid.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                            <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                            <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                       <div class="modal-dialog modal-sm">

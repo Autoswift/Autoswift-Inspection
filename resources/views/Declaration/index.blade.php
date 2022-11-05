@@ -24,7 +24,7 @@
                   <i class="fa fa-edit"></i>Declarations
                </li>
 
-               <span style="float:right;"><a href="{{ route('declaration.create')}}"><i class="fa fa-plus"></i> Add Declaration</a></span>
+               <span style="float:right;"><a target="_blank" href="{{ route('declaration.create')}}"><i class="fa fa-plus"></i> Add Declaration</a></span>
             </ol>
          </div>
       </div>
@@ -50,7 +50,7 @@
                           <td style="display:none;">{{$val->id}}</td>
                          <td>{{$val->note}}</td>
                          <td style="text-align:center;">
-                           <a href="{{ route('declaration.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
+                           <a target="_blank" href="{{ route('declaration.edit',$val->id)}}" title="Edit"><i class="fa fa-pencil"></i></a>
                             <a href="" data-toggle="modal" data-target="#{{$val->id}}deleteModal" title="Delete"><i class="fa fa-trash"></i></a>
                       <div id="{{$val->id}}deleteModal" class="delete-modal modal fade" role="dialog">
                       <div class="modal-dialog modal-sm">

@@ -1155,16 +1155,43 @@
                   <button type="submit" class="btn btn-primary mr-sm-1 mb-1 mb-sm-0 btn-lg waves-effect waves-light">Save</button>
                </div>
             </div>
-            <div class="col-md-2 col-12">
+			
+			<div class="row">
+				<div class="col-md-2 col-12">
+					<span>User or Chassis Photos</span>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Chassis Impression Photo</label>
+					<div class="form-group">
+						<input id="upload" type="file" name="upload" style="background-color: #337ab7; color: #fff" class="form-control image" accept="image/*">
+					</div>
+					<div class="profile-header mb-2">
+						<div class="relative ">
+							<img id="previewimage" style="width: 310px; height: 175px;margin-top: 35px;">
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-12">
+					<label>Front Side Photo</label>
+					<div class="form-group">
+						<input id="front_side_photo" type="file" name="front_side_photo" style="background-color: #337ab7; color: #fff" class="form-control image" accept="image/*">
+					</div>
+					<div class="profile-header mb-2">
+						<div class="relative ">
+							<img id="front_side_photo_preview" style="width: 310px; height: 175px;margin-top: 35px;">
+						</div>
+					</div>
+				</div>
+			</div>
+			
+            <?php /* <div class="col-md-2 col-12">
                <span>Chassis Impression Photo
                </span>
             </div>
             <div class="col-md-4 col-12">
-               <div class="form-group">
-                  <input id="upload" type="file" name="upload" style="background-color: #337ab7; color: #fff"
-                     class="form-control" accept="image/*"
-                     class="image">
-               </div>
+				<div class="form-group">
+					<input id="upload" type="file" name="upload" style="background-color: #337ab7; color: #fff" class="image form-control" accept="image/*">
+				</div>
             </div>
             <div class="col-md-6 col-12">
                <div class="profile-header mb-2">
@@ -1172,32 +1199,24 @@
                      <img id="previewimage" style="width: 253px; height: 141px;">
                   </div>
                </div>
-            </div>
+            </div>*/ ?>
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
             <div class="col-md-2 col-12">
-               <span>Photo
-               </span>
+               <span>Permanent Photos ({{config('global.max_permanent_photos')}} Max.)</span>
             </div>
-            <div class="col-md-4 col-12">
-               <div class="form-group">
-                  <input id="uploadPhoto" type="file" 
-                     name="uploadPhotos[]"  style="background-color: #337ab7; color: #fff;"
-                     class="form-control" accept="image/*"
-                     multiple="multiple">
-               </div>
-            </div>
+			@php
+			$photo_types = config('global.photo_types')
+			@endphp
+            @include('Reports.upload_photos_common', ['photo_type' => $photo_types[0]])
             <div class="col-md-12 col-12">
-               <div class="profile-header" >
-                  <div class="relative" id='uploadImageMultiapl'>
-                     <div class="row" id="listImages">
-                     </div>
-                     <ul id="sortable" >
-                     </ul>
-                  </div>
-               </div>
+               &nbsp;
             </div>
+            <div class="col-md-2 col-12">
+               <span>Temporary Photos</span>
+            </div>
+            @include('Reports.upload_photos_common', ['photo_type' => $photo_types[1]])
             <div class="col-md-12 col-12">
                &nbsp;
             </div>
@@ -1462,6 +1481,13 @@
                      height: 300
                  }
              });
+			 
+			front_side_photo.onchange = evt => {
+				const [file] = front_side_photo.files
+				if (file) {
+					front_side_photo_preview.src = URL.createObjectURL(file)
+				}
+			}
          
              $('#upload').on('change', function() {
                  var reader = new FileReader();
@@ -1484,7 +1510,7 @@
                      $('form').append('<input type="hidden" name="ch_upload" value='+response+'>');   
                  })
              });
-             $("#uploadPhoto").change(function() {
+             /*$("#uploadPhoto").change(function() {
                  readMultipleURL(this);
              });
              function readMultipleURL(input) {
@@ -1498,7 +1524,32 @@
                      }
                      reader.readAsDataURL(input.files[i]);
                  }
-             }
+             }*/
+			 $(".uploadPhoto").change(function() {
+		var photo_type = $(this).attr('rel');
+		if(photo_type == 'permanent') {
+			var sortableCount = $('ul#sortable_'+photo_type+' li.ui-state-default').length;
+			var newImageCount = this.files.length;
+			if((sortableCount+newImageCount) > "{{config('global.max_permanent_photos')}}"){
+				alert('You have already exceed max limit.');
+				$(this).val(null);
+				return false;
+			}
+		}
+		readMultipleURL(this);
+	});
+	
+	function readMultipleURL(input) {
+		var photo_type = $(input).attr('rel');
+		$('#listImages_'+photo_type).empty();
+		for (var i = 0; i < input.files.length; i++) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				$('#listImages_'+photo_type).append('<div class="col-md-2 col-12"><img src="' + e.target.result + '"class="img-fluid mb-4"/></div>');
+			}
+			reader.readAsDataURL(input.files[i]);
+		}
+	}
    $('input[type=text]').keyup(function () {
       if($(this).attr('id')!='general_comment'){
          this.value = this.value.toUpperCase();
