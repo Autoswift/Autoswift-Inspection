@@ -33,11 +33,7 @@
       <form id="stateFilter">
          <div class="row" style="margin:20px 0;">
             <div class="col-sm-3 data-field-col">
-               <label for="data-category">States
-                  <button type="button" class="edit_grid_setting" data="area_state" style="border: none;border-radius: 5px;background-color: #8c8c8c;color: #fff;font-size: 14px;">
-                    <i class="fa fa-pencil"></i>
-                 </button>
-               </label>
+               <label for="data-category">States</label>
                <select class="form-control" id="area_state" name="area_state">
                   <option value="">Select State</option>
                   @foreach($state as $item)
@@ -45,7 +41,7 @@
                   @endforeach;
                </select>
             </div>            
-            <div class="col-sm-3 data-field-col">
+            <?php /* <div class="col-sm-3 data-field-col">
                <label for="data-category">City
                   <button type="button" class="edit_grid_setting" data="city" style="border: none;border-radius: 5px;background-color: #8c8c8c;color: #fff;font-size: 14px;">
                     <i class="fa fa-pencil"></i>
@@ -54,7 +50,7 @@
                <select name="name" class="form-control" id="name1" required="">
                   <option value="">Select City</option>
                </select>
-            </div>
+            </div> */ ?>
          </div>
       </form>
       </div>
@@ -182,14 +178,14 @@
         }
       });
       $('#stateFilter select').change(function() {
-        var select
+        var select = null;
         table.search($(this).val()).draw();
         if($(this).attr('name')=='area_state'){
           var select = $('form select[name=name]');
           select.html('<option value="0">Select City</option>');
         }
         
-        var url = '{{route("area.create")}}'
+        /*var url = '{{route("area.create")}}'
         formdata=$("#stateFilter select").serialize()
         if(select){
           $.get(url,formdata,function(data) {
@@ -197,7 +193,7 @@
               select.append('<option value="' + key + '">' + value + '</option>');
             });
           });
-        }
+        }*/
       });
     });
 </script>

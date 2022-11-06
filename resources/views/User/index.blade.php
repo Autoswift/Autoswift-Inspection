@@ -164,7 +164,6 @@ $item_id=Request::segment(3);
 				<option value="active" toast-text="Do you want the activate selected users?">Active</option>
 				<option value="inactive" toast-text="Do you want the inactive selected users?">Inactive</option>
 				<option value="delete" toast-text="Do you want the deleted selected users?">Delete</option>
-				<option value="rejected" toast-text="Do you want the rejected selected users?">Rejected</option>
 			</select>
 		</div>
 		<div class="col-lg-2" style="margin: 0 0 15px 5px;">
@@ -251,9 +250,7 @@ $item_id=Request::segment(3);
                      @endphp
                      <tr>
                         <td style="text-align:left;" width="20px">
-							@if($val->status!='requested')
-								<input type="checkbox" name="multicheck[]" value="{{$val->id}}" class="multicheck">
-							@endif
+							<input type="checkbox" name="multicheck[]" value="{{$val->id}}" class="multicheck">
 						</td>
                         <td style="text-align:left;" width="20px">{{$i}}</td>
                        	<td>{{$val->id}}</td>
@@ -288,12 +285,12 @@ $item_id=Request::segment(3);
                         <td>{{$val->employee_id}}:<span class="ref_start_change{{$val->id}}">{{$val->ref_start}}</span>&nbsp;&nbsp;<span class="action-edit" style="cursor:pointer" onclick=edit_ref({{$val->id}},{{$val->ref_start}}) id=edit{{$val->id}}><i class="fa fa-edit"></i></i></span><span id=refresh{{$val->id}}><span></td>
                         @endif
                         <td>{{$val->mobile_number}}</td>
-                        <td>{{$val->address?$val->address:'N/A'}}</td>
-                    	<td>{{$val->email?$val->email:'N/A'}}</td>
+                        <td>{{$val->address?$val->address:''}}</td>
+                    	<td>{{$val->email?$val->email:''}}</td>
                         @if($role=='mobile_executive')
-                        <td>{{$val->device_id?$val->device_id:'N/A'}}</td>
+                        <td>{{$val->device_id?$val->device_id:''}}</td>
                         @endif
-						<td>@if ($val->icard != null OR $val->govt_issue_id != null OR $val->back_govt_card != null)<a data-url="{{$val->icard}},{{$val->govt_issue_id}},{{$val->back_govt_card}}"><i class="fa fa-picture-o open_photo_slider" aria-hidden="true"></i></a> @else N/A @endif</td>
+						<td>@if ($val->icard != null OR $val->govt_issue_id != null OR $val->back_govt_card != null)<a data-url="{{$val->icard}},{{$val->govt_issue_id}},{{$val->back_govt_card}}"><i class="fa fa-picture-o open_photo_slider" aria-hidden="true"></i></a> @endif</td>
                     	@if($role!='mobile_executive')
                     	<td>{{date('d-m-Y',strtotime($val->created_at))}}</td>
                     	@endif
@@ -422,6 +419,7 @@ $item_id=Request::segment(3);
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.colVis.min.js"></script>
 <script type="text/javascript" src="{{ asset('js/multicheck.js') }}"></script>
 <script type="text/javascript">
+	$('#multicheck_action').val('none');
 	header=$.trim($('#page-header').text());
 	user="{{Auth()->user()->role}}";
 	var hideTargets = [];

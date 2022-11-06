@@ -145,12 +145,12 @@
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Valuation Initiated By<span style="color:red;">*</span></span>
+               <span>Inspection Requested By<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group form-group">
-                  <select class="custom-select form-control" name="valuation_by" id="valuation_by" data-validation-required-message="Please enter Valuation Initiated" style="background-color: #97e6f3;" required>
-                     <option value=''>Select Valuation Initiated By</option>
+                  <select class="custom-select form-control" name="valuation_by" id="valuation_by" data-validation-required-message="Please select Inspection Requested By" style="background-color: #97e6f3;" required>
+                     <option value=''>Select Inspection Requested By</option>
                      @foreach($company as $key => $item)
                      <option value='{{$key}}'>{{$item}}</option>
                      @endforeach
@@ -159,20 +159,19 @@
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Financer's Representative<span style="color:red;">*</span></span>
+               <span>Executive Name<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="financer_representative"
                      class="form-control"
-                     placeholder="Financer's Representative"
-                     name="financer_representative" data-validation-required-message="Please enter Financer's Representative" style="background-color: #97e6f3;" required>
+                     placeholder="Executive Name"
+                     name="financer_representative" data-validation-required-message="Please enter Executive Name" style="background-color: #97e6f3;" required>
                   <div class="help-block"></div>
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Place Of
-               Valuation<span style="color:red;">*</span></span>
+               <span>Place Of Inspection<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group">
@@ -180,7 +179,7 @@
                      <input type="text" id="place_of_valuation"
                         class="form-control"
                         name="place_of_valuation" 
-                        placeholder="Place Of Valuation" data-validation-required-message="Please enter Place Of Valuation" style="background-color: #97e6f3;" required>
+                        placeholder="Place Of Inspection" data-validation-required-message="Please enter Place Of Inspection" style="background-color: #97e6f3;" required>
                      <div class="help-block"></div>
                   </div>
                </div>
@@ -216,14 +215,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Make And Model<span style="color:red;">*</span></span>
+               <span>Make & Model<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-4 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="make_model"
                      class="form-control"
-                     placeholder="Search Make And Model"
-                     name="make_model" data-validation-required-message="Please enter Make And Model" style="background-color: #f39797;" maxlength="33" required>
+                     placeholder="Search Make & Model"
+                     name="make_model" data-validation-required-message="Please enter Make & Model" style="background-color: #f39797;" maxlength="33" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -311,14 +310,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Finance Taken By<span style="color:red;">*</span></span>
+               <span>Borrower Name<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-4 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="financed_by"
                      class="form-control"
                      name="financed_by" 
-                     placeholder="Finance Taken By" data-validation-required-message="Please enter Finance Taken By" maxlength="33" style="background-color: #97e6f3;" required>
+                     placeholder="Borrower Name" data-validation-required-message="Please enter Borrower Name" maxlength="33" style="background-color: #97e6f3;" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -396,14 +395,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Tax Paid Upto</span>
+               <span>Tax</span>
             </div>
             <div class="col-md-4 col-12">
                <div
                   class="form-label-group form-group">
                   <input type="text" id="tax_paid"
                      class="form-control" name="tax_paid" 
-                     placeholder="Tax Paid Upto" data-validation-required-message="Please enter Tax Paid Upto"  style="background-color: #93f793;" maxlength="33" required value="-">
+                     placeholder="Tax" data-validation-required-message="Please enter Tax"  style="background-color: #93f793;" maxlength="33" required value="-">
                   <div class="help-block"></div>
                </div>
             </div>
@@ -442,14 +441,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Policy No.</span>
+               <span>Policy Type & No.</span>
             </div>
             <div class="col-md-4 col-12">
                <div
                   class="form-label-group form-group ">
                   <input type="text" id="policy_no"
                      class="form-control" name="policy_no" 
-                     placeholder="Policy Number" value="-" data-validation-required-message="Please enter Policy No" style="background-color: #93f793;" maxlength="33" required>
+                     placeholder="Policy Type & No." value="-" data-validation-required-message="Please enter Policy Type & No." style="background-color: #93f793;" maxlength="33" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -493,7 +492,7 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Policy Type</span>
+               <span>Permit</span>
             </div>
             <div class="col-md-4 col-12">
                <div
@@ -501,7 +500,7 @@
                   <input type="text" id="policy_type"
                      class="form-control"
                      name="policy_type" 
-                     placeholder="Policy Type" value="-" data-validation-required-message="Please enter Policy Type" style="background-color: #93f793;" maxlength="33" required>
+                     placeholder="Permit" value="-" data-validation-required-message="Please enter Permit" style="background-color: #93f793;" maxlength="33" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -524,7 +523,7 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Owner in Policy</span>
+               <span>Fitness</span>
             </div>
             <div class="col-md-4 col-12">
                <div
@@ -532,7 +531,7 @@
                   <input type="text" id="owner_in_policy"
                      class="form-control"
                      name="owner_in_policy" 
-                     placeholder="Owner In Policy" value="-" data-validation-required-message="Please enter Owner in Policy" style="background-color: #93f793;" maxlength="33" required>
+                     placeholder="Fitness" value="-" data-validation-required-message="Please enter Fitness" style="background-color: #93f793;" maxlength="33" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -851,8 +850,7 @@
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="coolingExhaust-column">Cooling &
-                  Exhaust System</label>
+                  <label for="coolingExhaust-column">Cooling System</label>
                   <select class="custom-select form-control"
                      id="c_cooling_system"
                      name="c_cooling_system" style="background-color: #93f793;">
@@ -911,8 +909,7 @@
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="cabinBody-column">Cabin & Body
-                  Ext</label>
+                  <label for="cabinBody-column">Cabin & Exterior</label>
                   <select class="custom-select form-control"
                      id="c_cabin" name="c_cabin" style="background-color: #93f793;">
                      <option value="good">Good</option>
@@ -923,8 +920,7 @@
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="conditionInterior-column">Condition
-                  & Interior</label>
+                  <label for="conditionInterior-column">Interior</label>
                   <select class="custom-select form-control"
                      id="c_condition_of_interiors"
                      name="c_condition_of_interiors" style="background-color: #93f793;">
@@ -956,6 +952,19 @@
                   </select>
                </div>
             </div>
+			
+            <div class="col-md-2 col-12">
+               <div class="form-group">
+                  <label for="">Vehicle Overall Rating</label>
+				  <select class="custom-select form-control"
+                     id="overall_rating" name="overall_rating" style="background-color: #93f793;">
+                     <option value="good">Good</option>
+                     <option value="average">Average</option>
+                     <option value="poor">Poor</option>
+                  </select>
+               </div>
+            </div>
+			
             <div class="col-md-2 col-12 duplicate_entry" style="display: none;">
                <div class="form-group">
                   <label for="">Duplicate Reason</label>
@@ -1563,13 +1572,13 @@
             $.post('{{route("check_duplicate")}}',formdata,function(result){ 
                if(result.status==true){
                   toastr.info(result.msg,'Info');
-                  if(index='registration_no'){
+                  if(index=='registration_no'){
                      dp_rg=1;  
-                     $.each(result.data,function(i,v){
+                    $.each(result.data,function(i,v){
                         if(i!='reference_no' && i!='report_date' && i!='right_tyer_quantity' && i!='right_tyer_company' &&  i!='right_quality' && i!='left_tyer_quantity' && i!='left_tyer_company' && i!='left_quality'){
                            $('#'+i).val(v);
-                           }
-                     });
+                        }
+                    });
                      if(result.data.report_date!=null){
                        $('#report_date').val(moment.unix(result.data.report_date).format("DD-MM-YYYY"));
                      } 

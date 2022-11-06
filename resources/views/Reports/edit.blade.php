@@ -167,12 +167,12 @@
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Valuation Initiated By<span style="color:red;">*</span></span>
+               <span>Inspection Requested By<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group form-group">
-                  <select class="custom-select form-control" name="valuation_by" id="valuation_by" data-validation-required-message="Please enter Valuation Initiated" @if($finance->report_date!=null && $finance->report_date!='' && $finance->photo!=null && $role==2) disabled @endif required>
-                     <option value=''>Select Valuation Initiated By</option>
+                  <select class="custom-select form-control" name="valuation_by" id="valuation_by" data-validation-required-message="Please select Valuation Initiated" @if($finance->report_date!=null && $finance->report_date!='' && $finance->photo!=null && $role==2) disabled @endif required>
+                     <option value=''>Select Inspection Requested By</option>
                      @foreach($company as $key => $item)
                         <option value='{{$key}}' {{$key==$finance->valuation_by?'Selected':''}}>{{$item}}</option>
                      @endforeach
@@ -186,14 +186,14 @@
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Financer's Representative<span style="color:red;">*</span></span>
+               <span>Executive Name<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="financer_representative"
                      class="form-control"
-                     placeholder="Financer's Representative"
-                     name="financer_representative" data-validation-required-message="Please enter Financer's Representative" value="{{$finance->financer_representative}}"  @if($finance->report_date!=null && $finance->report_date!='' && $finance->photo!=null && $role==2) readonly @endif required>
+                     placeholder="Executive Name"
+                     name="financer_representative" data-validation-required-message="Please enter Executive Name" value="{{$finance->financer_representative}}"  @if($finance->report_date!=null && $finance->report_date!='' && $finance->photo!=null && $role==2) readonly @endif required>
                       @if($finance->report_date!=null && $finance->report_date!='' && $finance->photo!=null && $role==2)  
                      <div class="form-control-position">
                        <i class="fa fa-lock"></i>
@@ -203,8 +203,7 @@
                </div>
             </div>
             <div class="col-md-4 col-12">
-               <span>Place Of
-               Valuation<span style="color:red;">*</span></span>
+               <span>Place Of Inspection<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-5 col-12">
                <div class="form-label-group form-group">
@@ -212,7 +211,7 @@
                      <input type="text" id="place_of_valuation"
                         class="form-control"
                         name="place_of_valuation" 
-                        placeholder="Place Of Valuation" data-validation-required-message="Please enter Place Of Valuation" value="{{$finance->place_of_valuation}}" required>
+                        placeholder="Place Of Inspection" data-validation-required-message="Please enter Place Of Valuation" value="{{$finance->place_of_valuation}}" required>
                      <div class="help-block"></div>
                   </div>
                </div>
@@ -258,13 +257,13 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Make And Model<span style="color:red;">*</span></span>
+               <span>Make & Model<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-4 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="make_model"
                      class="form-control"
-                     placeholder=" Search Make And Model"
+                     placeholder=" Search Make & Model"
                      name="make_model" data-validation-required-message="Please enter Make And Model" maxlength="33" required value="{{$finance->make_model}}">
                   <div class="help-block"></div>
                </div>
@@ -353,14 +352,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Finance Taken By<span style="color:red;">*</span></span>
+               <span>Borrower Name<span style="color:red;">*</span></span>
             </div>
             <div class="col-md-4 col-12">
                <div class="form-label-group form-group">
                   <input type="text" id="financed_by"
                      class="form-control"
                      name="financed_by" 
-                     placeholder="Finance Taken By" data-validation-required-message="Please enter Finance Taken By"  value="{{$finance->financed_by}}" maxlength="33" required>
+                     placeholder="Borrower Name" data-validation-required-message="Please enter Finance Taken By"  value="{{$finance->financed_by}}" maxlength="33" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -425,14 +424,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Tax Paid Upto</span>
+               <span>Tax</span>
             </div>
             <div class="col-md-4 col-12">
                <div
                   class="form-label-group form-group">
                   <input type="text" id="tax_paid"
                      class="form-control" name="tax_paid" 
-                     placeholder="Tax Paid Upto" data-validation-required-message="Please enter Tax Paid Upto"  maxlength="33" value="{{$finance->tax_paid}}" required value="-">
+                     placeholder="Tax" data-validation-required-message="Please enter Tax"  maxlength="33" value="{{$finance->tax_paid}}" required value="-">
                   <div class="help-block"></div>
                </div>
             </div>
@@ -471,14 +470,14 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Policy No.</span>
+               <span>Policy Type & No.</span>
             </div>
             <div class="col-md-4 col-12">
                <div
                   class="form-label-group form-group ">
                   <input type="text" id="policy_no"
                      class="form-control" name="policy_no" 
-                     placeholder="Policy Number" value="-" data-validation-required-message="Please enter Policy No" maxlength="33" value="{{$finance->policy_no}}" required>
+                     placeholder="Policy Type & No." value="-" data-validation-required-message="Please enter Policy Type & No." maxlength="33" value="{{$finance->policy_no}}" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -515,7 +514,7 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Policy Type</span>
+               <span>Permit</span>
             </div>
             <div class="col-md-4 col-12">
                <div
@@ -523,7 +522,7 @@
                   <input type="text" id="policy_type"
                      class="form-control"
                      name="policy_type" 
-                     placeholder="Policy Type" value="-" data-validation-required-message="Please enter Policy Type" maxlength="33" value="{{$finance->policy_type}}" required>
+                     placeholder="Permit" value="-" data-validation-required-message="Please enter Permit" maxlength="33" value="{{$finance->policy_type}}" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -538,7 +537,7 @@
                </div>
             </div>
             <div class="col-md-2 col-12">
-               <span>Owner in Policy</span>
+               <span>Fitness</span>
             </div>
             <div class="col-md-4 col-12">
                <div
@@ -546,7 +545,7 @@
                   <input type="text" id="owner_in_policy"
                      class="form-control"
                      name="owner_in_policy" 
-                     placeholder="Owner In Policy" value="-" data-validation-required-message="Please enter Owner in Policy" maxlength="33" value="{{$finance->owner_in_policy}}" required>
+                     placeholder="Fitness" value="-" data-validation-required-message="Please enter Fitness" maxlength="33" value="{{$finance->owner_in_policy}}" required>
                   <div class="help-block"></div>
                </div>
             </div>
@@ -858,32 +857,28 @@
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="coolingExhaust-column">Cooling &
-                  Exhaust System</label>
+                  <label for="coolingExhaust-column">Cooling System</label>
                    {!! Form::select('c_cooling_system',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_cooling_system, ['class' => 'custom-select form-control','id'=>"c_cooling_system"]) !!}
                   
                </div>
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="suspension-column">Suspension
-                  System</label>
+                  <label for="suspension-column">Suspension System</label>
                    {!! Form::select('c_suspension_system',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_suspension_system, ['class' => 'custom-select form-control','id'=>"c_suspension_system"]) !!}
                 
                </div>
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="electrical-column">Electrical
-                  System</label>
+                  <label for="electrical-column">Electrical System</label>
                    {!! Form::select('c_electrical_system',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_electrical_system, ['class' => 'custom-select form-control','id'=>"c_electrical_system"]) !!}
                  
                </div>
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="wheelTyres-column">Wheel &
-                  Tyres</label>
+                  <label for="wheelTyres-column">Tyres Rating</label>
                    {!! Form::select('c_wheel',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_wheel, ['class' => 'custom-select form-control','id'=>"c_wheel"]) !!}
                  
                </div>
@@ -897,16 +892,14 @@
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="cabinBody-column">Cabin & Body
-                  Ext</label>
+                  <label for="cabinBody-column">Cabin & Exterior</label>
                    {!! Form::select('c_cabin',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_cabin, ['class' => 'custom-select form-control','id'=>"c_cabin"]) !!}
                  
                </div>
             </div>
             <div class="col-md-2 col-12">
                <div class="form-group">
-                  <label for="conditionInterior-column">Condition
-                  & Interior</label>
+                  <label for="conditionInterior-column">Interior</label>
                    {!! Form::select('c_condition_of_interiors',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->c_condition_of_interiors, ['class' => 'custom-select form-control','id'=>"c_condition_of_interiors"]) !!}
                  
                </div>
@@ -925,8 +918,15 @@
                  
                </div>
             </div>
+            <div class="col-md-2 col-12">
+               <div class="form-group">
+                  <label for="">Vehicle Overall Rating</label>
+                   {!! Form::select('overall_rating',array("good"=>"Good","average"=>"Average","poor"=>"Poor"),$finance->overall_rating, ['class' => 'custom-select form-control','id'=>"overall_rating"]) !!}
+                 
+               </div>
+            </div>
             @if($finance->report_date=='' || $finance->report_date==null)
-               <div class="col-md-2 col-12 duplicate_entry" style="display: none;">
+            <div class="col-md-3 col-12 duplicate_entry" style="display: none;">
                <div class="form-group">
                   <label for="">Duplicate Reason</label>
                  {!! Form::select('duplicate_reason',array(),null,['class' => 'custom-select form-control','id'=>"duplicate_reason","placeholder"=>"Select Duplicate Reason","required","data-validation-required-message"=>"Please Select Duplicate Reason"]) !!}
@@ -935,7 +935,7 @@
                </div>
             </div>
             @else
-            <div class="col-md-2 col-12 duplicate_entry" style="display: {{$finance->duplicate_entry?'':'none'}};">
+            <div class="col-md-3 col-12 duplicate_entry" style="display: {{$finance->duplicate_entry?'':'none'}};">
                 <label>Duplicate Reason</label>
                <div class="form-group">
                    @if($finance->duplicate_entry)

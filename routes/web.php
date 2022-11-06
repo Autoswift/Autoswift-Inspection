@@ -66,6 +66,9 @@ Route::group(['middleware' => ['auth']], function () {
 		Route::post('delete_rejected/{id?}','FinanceController@delete_rejected')->name('delete_rejected');
 		Route::post('pdf_remove','ValuationController@pdf_remove')->name('pdf_remove');
 		
+		
+		Route::get('pdfview',array('as'=>'pdfview','uses'=>'FinanceController@pdfview'));
+		
 	});
 	Route::group(['middleware' => ['auth','can:isWeb']], function () {
 		Route::resource('users','UserController');

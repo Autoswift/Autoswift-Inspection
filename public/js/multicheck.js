@@ -61,5 +61,6 @@
 				toastr.error('Please Check At Least 1 Checkbox to Perform Multi Check Action.');
 				return false;
 			}
+			$('#multicheck_action').val('none');
 		}
     }

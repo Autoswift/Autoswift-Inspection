@@ -75,15 +75,14 @@ class StateController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, State $state)
     {
        
         $request->validate([
             'name' => 'required|string|max:255|unique:states,name,'.$state->id
         ]);
-        $input = $request->all();   
-        $data = State::findOrFail($id);
-        $data->update($input);
+        $input = $request->all();
+        $state->update($input);
         return redirect('state')->with('updated','State Updated Successfully.');
     }
 
@@ -95,8 +94,7 @@ class StateController extends Controller
      */
     public function destroy(State $state)
     {
-        
         $state->delete();
-        return back()->with('deleted', 'Area Or City has been deleted');
+        return back()->with('deleted', 'State has been deleted');
     }
 }

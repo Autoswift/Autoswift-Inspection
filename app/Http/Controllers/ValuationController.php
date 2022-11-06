@@ -39,20 +39,24 @@ class ValuationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255|unique:valuations,name',
             'short_name' => 'required|string|max:6|unique:valuations,short_name'
         ]);
         $input = $request->all();
+		$data = Valuation::create(['address' => '']);
         if($request->file('gridpdf')){
+			$optimizePath = config('global.valuation_main_folder').$data->id.config('global.valuation_pdfs');
+			if(!file_exists(public_path().$optimizePath)) {
+				mkdir(public_path().$optimizePath, 0777, true);
+			}
             foreach($request->file('gridpdf') as $file){
                 $fileName = time().$file->getClientOriginalName().'.'.$file->extension();  
-                $file->move(public_path('/com_pdf/'), $fileName);
-                $com_pdf[]= $fileName;
+                $file->move(public_path().$optimizePath, $fileName);
+                $com_pdf[]= $optimizePath.$fileName;
             }
             $input['grid_pdf']=json_encode($com_pdf); 
         }
-        $data = Valuation::create($input);
-        $data->save();
+        $data->update($input);
         return redirect('valuation')->with('added','Valuation Initiated By Created Successfully.');
     }
 
@@ -89,22 +93,25 @@ class ValuationController extends Controller
     public function update(Request $request, Valuation $valuation)
     {
         $request->validate([
-            'name' => 'required',
+			'name' => 'required|string|max:255|unique:valuations,name,'.$valuation->id,
 			'short_name' => 'required|string|max:6|unique:valuations,short_name,'.$valuation->id
         ]);
         $input = $request->all(); 
         if($request->file('gridpdf')){
+			$optimizePath = config('global.valuation_main_folder').$valuation->id.config('global.valuation_pdfs');
+			if(!file_exists(public_path().$optimizePath)) {
+				mkdir(public_path().$optimizePath, 0777, true);
+			}
             foreach($request->file('gridpdf') as $file){
                 $fileName = time().rand().'.'.$file->extension();  
-                $file->move(public_path('/com_pdf/'), $fileName);
-                $com_pdf=json_decode($valuation->grid_pdf); 
-                $com_pdf[]= $fileName;
+                $file->move(public_path().$optimizePath, $fileName);
+                $com_pdf=json_decode($valuation->grid_pdf, 1); 
+                $com_pdf[]= $optimizePath.$fileName;
             }
              
             $input['grid_pdf']=json_encode($com_pdf); 
         }
-        $data = Valuation::findOrFail($valuation->id);
-        $data->update($input);
+        $valuation->update($input);
         return redirect('valuation')->with('updated','Valuation Initiated By Updated Successfully.');
     }
 
@@ -156,16 +163,18 @@ class ValuationController extends Controller
     public function pdf_remove(Request $request){
          if($request->ajax()){
             $data = Valuation::findOrFail($request->valuation);
-            $pdf=json_decode($data->grid_pdf); 
-            if (File::exists(public_path('com_pdf').'/'.$pdf[$request->pdf_id])) {
-                unlink(public_path('com_pdf').'/'.$pdf[$request->pdf_id]);
-                unset($pdf[$request->pdf_id]);
-                // $pdf=json_encode($pdf);
-                $pdf=empty($pdf) ? NULL : json_encode($pdf);
-              	$data->update(['grid_pdf'=>$pdf]);
-                 return $arr = array('status' => true,'action'=>'post','msg'=>'Grid Pdf Deleted Successfully');
-            }
-             return $arr = array('status' => false,'action'=>'post','msg'=>'Somthing went Wrong');
+            $pdf=json_decode($data->grid_pdf, 1);
+			$filename = $pdf[$request->pdf_id];
+            unset($pdf[$request->pdf_id]);
+			// $pdf=json_encode($pdf);
+			$pdf=empty($pdf) ? NULL : json_encode($pdf);
+			if($data->update(['grid_pdf'=>$pdf])) {
+				if (File::exists(public_path($filename))) {
+					unlink(public_path($filename));
+				}
+				return $arr = array('status' => true,'action'=>'post','msg'=>'Grid Pdf Deleted Successfully');
+			}
+            return $arr = array('status' => false,'action'=>'post','msg'=>'Somthing went Wrong');
          }
     }
 	

@@ -35,6 +35,53 @@ class FinanceController extends Controller
 		$this->alphabet = range('A', 'Z');
 	}
 	
+	
+	
+	public function pdfview(Request $request) {
+		$items = DB::table("states")->get();
+		/*view()->share('items',$items);
+		if($request->has('download')){
+			$pdf = PDF::loadView('pdfview');
+			return $pdf->download('pdfview.pdf');
+		}
+		return view('Reports.pdfview');*/
+		
+		$filename = 'hello_world.pdf';
+
+    	$data = [
+    		'items' => $items
+    	];
+
+    	$view = \View::make('Reports.pdfview', $data);
+        $html = $view->render();
+
+    	$pdf = new PDF;
+        
+        $pdf::SetTitle('Hello World');
+        $pdf::AddPage();
+        $pdf::writeHTML($html, true, false, true, false, '');
+
+        $pdf::Output(public_path($filename), 'F');
+
+        return response()->download(public_path($filename));
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public function reportsFilterData ($filterdata) {
 		$data = Finance::select('finances.*','valuations.name','users.name as created_by')->leftJoin('valuations','finances.valuation_by','=','valuations.id')->leftJoin('users','finances.user_id','=','users.id');
 		$filtring = false;
@@ -384,6 +431,17 @@ class FinanceController extends Controller
             $input['approve_photo']=json_encode($images);  
         }
 		
+		
+		if($request->file('uploadVideos')) {
+			$optimizeVideoPath = config('global.report_main_folder').$newReport->id.config('global.report_videos');
+            foreach($request->file('uploadVideos') as $fileKey=>$file){
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+                $file->move(public_path().$optimizeVideoPath, $filename);
+                $videos[$fileKey]=$optimizeVideoPath.$filename;
+            }
+            $input['approve_video'] = $input['videos'] = json_encode($videos);
+        }
+		
         if($request->duplicate_reason){
             $input['duplicate_entry']=1;
         }
@@ -485,15 +543,17 @@ class FinanceController extends Controller
 				\File::delete(public_path().$update['chachees_number_photo']);
 			}
         }
-        if($request->approve_photo){
-            $input['approve_photo']=$request->approve_photo; 
-        }
 		
 		if($front_side_photo = $request->file('front_side_photo')) {
 			$filename = str_replace(' ', '_',time().Str::random(15).'.'.$front_side_photo->extension());
 			$input['front_side_photo'] = uploadDocs($front_side_photo, $optimizeImagePath, $update['front_side_photo'], $filename);
 		}
 		
+		
+		$input['approve_photo'] = [];
+        if(!empty($request->approve_photo)) {
+            $input['approve_photo'] = $request->approve_photo; 
+        }
         if($request->file('uploadPhotos')){
 			$p=json_decode($update['photo'], 1);
             foreach(config('global.photo_types') as $photo_type) {
@@ -513,40 +573,32 @@ class FinanceController extends Controller
 				}
             }
             $input['photo']=json_encode($images);
-            //$input['approve_photo']=json_encode($images);
-            //if(!empty($update['photo'])){
-                //$p=json_decode($update['photo']);
-                //$input['photo']=json_encode(array_merge($p,$images));  
-                //$ap=json_decode($update['approve_photo']);
-                //$input['approve_photo']=json_encode(array_merge($ap,$images));  
-            //}   
         }
+		$input['approve_photo']=json_encode($input['approve_photo']);
 		
-		if(!empty($input['approve_photo'])) {
-			$input['approve_photo']=json_encode($input['approve_photo']);
+		$input['approve_video'] = [];
+		if(!empty($request->approve_video)) {
+			$input['approve_video'] = $request->approve_video;
 		}
-		
-		$optimizeVideoPath = config('global.report_main_folder').$financeid.config('global.report_videos');
-		$videos = json_decode($update['videos'], 1);
 		if($request->file('uploadVideos')) {
-			//if(!empty($update['videos'])){
-                //$videos = json_decode($update['videos'], 1);
-			//}
+			$optimizeVideoPath = config('global.report_main_folder').$financeid.config('global.report_videos');
+			if(!file_exists(public_path().$optimizeVideoPath)) {
+				mkdir(public_path().$optimizeVideoPath, 0777, true);
+			}
+			$videos = json_decode($update['videos'], 1);
             foreach($request->file('uploadVideos') as $fileKey=>$file){
 				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
                 $file->move(public_path().$optimizeVideoPath, $filename);
 				if(!empty($videos[$fileKey]) && \File::exists(public_path().$videos[$fileKey])) {
                     \File::delete(public_path().$videos[$fileKey]);
 				}
-                $videos[$fileKey]=$optimizeVideoPath.$filename;
+                $input['approve_video'][$fileKey] = $videos[$fileKey]=$optimizeVideoPath.$filename;
             }
             $input['videos']=json_encode($videos);
         }
-		if(!empty($videos) && !empty($request->approve_video)) {
-			$input['approve_video']=json_encode($request->approve_video);
-		} else {
-			$input['approve_video']=json_encode([]);
-		}
+		$input['approve_video']=json_encode($input['approve_video']);
+		
+		
         if(empty($update['report_date'])){
             $input['user_id']=Auth()->id();
             $firebaseToken = User::where('id','=',$update['user_id'])->pluck('firebase_id')->all();
@@ -680,6 +732,11 @@ class FinanceController extends Controller
                 if($request->registration_no){
                 $data = Finance::where('registration_no','=',$request->registration_no)->latest()->first();
                 if($data){
+					$remove_keys = ['front_side_photo', 'approve_video', 'videos', 'duplicate_reason', 'pdf_file', 'form_pdf', 'chachees_number_photo', 'photo', 'approve_photo', 'selfie', 'axis', 'process', 'status', 'mobile_data', 'duplicate_entry'];
+					foreach($remove_keys as $rkey) {
+						unset($data->$rkey);
+					}
+					//prd($data);
                     $arr = array('status' => true,'action'=>'get','data' =>$data,'msg'=>'Registration Number is Duplicate');
                 }
                 return $arr; 
@@ -1001,7 +1058,8 @@ class FinanceController extends Controller
          
         // NEW WORKSHEET
         $sheet = $spreadsheet->getActiveSheet();
-
+		$sheet->getPageMargins()->setTop('.25')->setBottom('.25')->setLeft('.2')->setRight('.2');
+		$sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)->setFitToPage(true);
         $sheet->setTitle(date('F_Y',strtoTime($d1)).'_Invoice');
         $sheet->mergeCells('A1:I1');
         $objRichText = new RichText();
@@ -1211,16 +1269,16 @@ class FinanceController extends Controller
 		$borderStyleArray = array(
             'borders' => array(
                 'top' => array(
-                    'borderStyle' =>Border::BORDER_THICK
+                    'borderStyle' =>Border::BORDER_THIN
                 ),
                  'bottom' => array(
-                    'borderStyle' =>Border::BORDER_THICK
+                    'borderStyle' =>Border::BORDER_THIN
                 ),
                   'left' => array(
-                    'borderStyle' =>Border::BORDER_THICK
+                    'borderStyle' =>Border::BORDER_THIN
                 ),
                    'right' => array(
-                    'borderStyle' =>Border::BORDER_THICK
+                    'borderStyle' =>Border::BORDER_THIN
                 ),
             ),
         );
@@ -1228,6 +1286,8 @@ class FinanceController extends Controller
         $spreadsheet->setActiveSheetIndex(1);
         $spreadsheet->getActiveSheet()->setTitle(date('F_Y',strtoTime($d1)).'_Covernote');
         $sheet =$spreadsheet->setActiveSheetIndex(1);
+		$sheet->getPageMargins()->setTop('.25')->setBottom('.25')->setLeft('.2')->setRight('.2');
+		$sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)->setFitToPage(true);
         $sheet->mergeCells('A1:K1');
         $sheet->mergeCells('A2:K2');
         $objRichText = new RichText();
@@ -1396,7 +1456,6 @@ class FinanceController extends Controller
         PDF::setHeaderCallback(function($pdf) use($FinanceData) {
             $pdf->SetFont('helvetica', 'B', 15);
             $pdf->Cell(0, 10,$FinanceData['Finance']['registration_no'], 0, false, 'L', 0, '', 0, false, 'T', 'M');
-
         });
         ob_start();
         $html = "";
@@ -1722,6 +1781,10 @@ class FinanceController extends Controller
         if(!empty($FinanceData["Finance"]['approve_photo'])){
             $thirdKey = 0;
 			$photo = [];
+			if(!empty($FinanceData["Finance"]['front_side_photo'])) {
+				$photo[] = $FinanceData["Finance"]['front_side_photo'];
+			}
+			//prd($photo);
             $photoArray=json_decode($FinanceData["Finance"]['approve_photo'], 1);
 			foreach(config('global.photo_types') as $photo_type) {
 				if(!empty($photoArray[$photo_type])) {

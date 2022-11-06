@@ -48,9 +48,9 @@
                      </tr>
                   </thead>
                   <tbody>
-                      @foreach($header as $val)
+                      @foreach($header as $k => $val)
                        <tr>
-                         <td style="text-align:center;">{{$val->id}}</td>
+                         <td style="text-align:center;">{{$k+1}}</td>
                          <td>{{$val->mobile_number}}</td>
                          <td>{{$val->licence_no}}</td>
                          <td>{{$val->expire}}</td>

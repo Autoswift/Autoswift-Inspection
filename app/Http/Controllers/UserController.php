@@ -82,7 +82,7 @@ class UserController extends Controller
         }
 		$request->validate($validateArr, $messages); 
         $input=$request->all();
-        if($request->role==3||$request->role==4){
+        if($request->role==4){
             $input['status']='requested';
         }else{
 			$input['status'] ='active'; 
@@ -195,7 +195,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
         $this->authorize('isSuper');
 		$messages = [
@@ -207,7 +207,7 @@ class UserController extends Controller
            'role' => 'required',
             'name' => 'required|string|max:255',
             'pass1' => 'required|string',
-            'username'=>'required|string|unique:users,username,'.$id,
+            'username'=>'required|string|unique:users,username,'.$user->id,
             'mobile_number'=>'required',
             'state'=>'required',
             'area_id'=>'required'
@@ -216,7 +216,7 @@ class UserController extends Controller
 			$validateArr['employee_id'] = 'required';
         }
         if($request->email){
-			$validateArr['email'] = 'required|string|email|max:255|unique:users,email,'.$id; 
+			$validateArr['email'] = 'required|string|email|max:255|unique:users,email,'.$user->id; 
         }
         if($request->role==3||$request->role==4||$request->role==5) {
 			$validateArr['area_id'] = 'required';			
@@ -224,20 +224,20 @@ class UserController extends Controller
         }
 		$request->validate($validateArr, $messages);
         $input=$request->all();
-		$data = User::findOrFail($id);
+		//$data = User::findOrFail($id);
 		if($request->role != 4) {
 			$optimizePath = config('global.employees_main_folder').$id.'/';
 			if(!file_exists(public_path().$optimizePath)) {
 				mkdir(public_path().$optimizePath, 0777, true);
 			}
 			if($file = $request->file('icard')) {
-				$input['icard'] = uploadDocs($file, $optimizePath, $data->icard);
+				$input['icard'] = uploadDocs($file, $optimizePath, $user->icard);
 			}
 			if($file = $request->file('govt_issue_id')) {        
-				$input['govt_issue_id'] = uploadDocs($file, $optimizePath, $data->govt_issue_id);
+				$input['govt_issue_id'] = uploadDocs($file, $optimizePath, $user->govt_issue_id);
 			}   
 			if($file = $request->file('back_govt_card')) {        
-				$input['back_govt_card'] = uploadDocs($file, $optimizePath, $data->back_govt_card);
+				$input['back_govt_card'] = uploadDocs($file, $optimizePath, $user->back_govt_card);
 			}
 		} else {
 			unset($input['address']);
@@ -250,12 +250,13 @@ class UserController extends Controller
 				$input['icard'] = '';
 				$input['govt_issue_id'] = '';
 				$input['back_govt_card'] = '';
-				$this->removeUserImages($data);
+				$input['status'] = 'requested';
+				$this->removeUserImages($user);
 			}
 		}
         $input['pass1'] =$request->pass1;
         $input['password'] = Hash::make($request->pass1);
-        $data->update($input);
+        $user->update($input);
          if($request->role==1){
             $role='super_admin';
         }elseif($request->role==2){
@@ -270,7 +271,7 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('updated','User Updated Successfully.');
         };
 		if(!empty($input['reset_kyc']) && $input['reset_kyc'] == 'yes') {
-			return redirect()->route('users.edit',$data->id)->with('updated','User KYC reset Successfully.');
+			return redirect()->route('users.edit',$user->id)->with('updated','User KYC reset Successfully.');
 		} else {
 			return redirect()->route('userfill',$role)->with('updated','User Updated Successfully.');
 		}
@@ -363,7 +364,7 @@ class UserController extends Controller
 			'multicheck' => 'required'
         ]);
 		$arr = array('status' => false,'action'=>'Submited','msg' => 'Somthing Went Wrong');
-		if(in_array($request->action, ['active', 'inactive', 'delete', 'rejected'])) {
+		if(in_array($request->action, ['active', 'inactive', 'delete'])) {
 			if($request->action == 'delete') {
 				foreach($request->multicheck as $key => $user_id) {
 					$user = User::findOrFail($user_id);
@@ -373,7 +374,16 @@ class UserController extends Controller
 					}
 				}
 			} else {
-				if(User::whereIn('id', $request->multicheck)->update(['status'=>$request->action])){
+				$updateIds = $request->multicheck;
+				$users = User::whereIn('id', $updateIds)->pluck('status', 'id');
+				foreach($users as $user_id => $status) {
+					if($status == 'requested') {
+						if (($key = array_search($user_id, $updateIds)) !== false) {
+							unset($updateIds[$key]);
+						}
+					}
+				}
+				if(User::whereIn('id', $updateIds)->update(['status'=>$request->action])){
 					$arr = array('status' => true,'action'=>'Submited','msg' => 'User(s) status changed successfully');
 				}
 			}
@@ -387,6 +397,7 @@ class UserController extends Controller
             return $data;
         }
     }
+	
     public function profile(request $request){
         if($request->isMethod('post')){
             $id=Auth()->user()->id;
@@ -404,6 +415,7 @@ class UserController extends Controller
         }
         return view('User.profile');
     }
+	
     public function changepassword(request $request){
         if($request->isMethod('post')){
             if (!(Hash::check($request->get('old_password'), Auth::user()->password))) {
@@ -425,6 +437,7 @@ class UserController extends Controller
         }
         return view('User.changepassword');
     }
+	
     public function image(Request $request){
          if($request->ajax()){
             $request->validate([
@@ -448,11 +461,22 @@ class UserController extends Controller
             return Response()->json($arr);
         }     
     }
+	
     public function change_status(Request $request){
         if($request->ajax()){
-            $data = User::findOrFail($request->id);
-            $data=$data->update(array('status'=>$request->status));
-            if($data){
+            $user = User::findOrFail($request->id);
+			$input = [];
+			if($request->status == 'requested') {
+				$input['address'] = '';
+				$input['email'] = '';
+				$input['device_id'] = '';
+				$input['icard'] = '';
+				$input['govt_issue_id'] = '';
+				$input['back_govt_card'] = '';
+				$this->removeUserImages($user);
+			}
+			$input['status'] = $request->status;
+            if($user->update($input)){
                 $arr = array('status' => true,'action'=>'update','msg' => 'Status Change Successfully');
             }
             return Response()->json($arr);

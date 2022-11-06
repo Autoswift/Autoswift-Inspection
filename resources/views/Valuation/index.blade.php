@@ -37,7 +37,7 @@
                   <thead>
                      <tr class="header-titles">
                         <th style="width:25px;">S.No.</th>
-                        <th style="display:none;">id</th>
+                        <th>id</th>
                         <th>Valuations Initiated By</th>
                         <th>Initials</th>
                         <th>Address</th>
@@ -50,14 +50,14 @@
                       @foreach($valuation as $key => $val)
                        <tr>
                          <td>{{$key+1}}</td>
-                         <td style="display:none;">{{$val->id}}</td>
+                         <td>{{$val->id}}</td>
                          <td>{{$val->name}}</td>
                          <td>{{$val->short_name}}</td>
                          <td>{{$val->address}}</td>
                          <td>
                          @if($val->grid_pdf!='' || $val->grid_pdf!=null)
-                         	@foreach(json_decode($val->grid_pdf) as $k=>$pdf_path)
-                         		<a href="{{asset('com_pdf').'/'.$pdf_path}}" target="_blank" style="font-weight: bold;text-decoration:none;" data-toggle="modal" class="grid-info-pdf" ><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a>
+                         	@foreach(json_decode($val->grid_pdf, 1) as $k=>$pdf_path)
+                         		<a href="{{asset($pdf_path)}}" target="_blank" style="font-weight: bold;text-decoration:none;" data-toggle="modal" class="grid-info-pdf" ><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a>
                          	@endforeach
                          @else
                          	{{'N/A'}}

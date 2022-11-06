@@ -62,22 +62,22 @@
                </div> -->
                <div class="row" style="padding-left: 10px;">
                   @php
-                  $file=json_decode($valuation->grid_pdf)
+                  $file=json_decode($valuation->grid_pdf, 1)
                   @endphp
                   @if($file)
                   @foreach($file as $key => $item)
 				   @if($key == 0)
 					  <div class="col-md-offset-2 col-md-2" id="vl_pdf_{{$key}}">
-						 <embed width="100%" height="100%" name="plugin" src="{{asset('com_pdf').'/'.$item}}" type="application/pdf">
+						 <embed width="100%" height="100%" name="plugin" src="{{asset($item)}}" type="application/pdf">
 						 <a href="#" onclick="remove('{{$key}}')"style="font-weight: bold;text-decoration:none;padding-left: 10px;">Remove</a>
-						 <a href="{{asset('com_pdf').'/'.$item}}" target="_blank" style="font-weight: bold;text-decoration:none;padding-left: 70px;">Open</a>
+						 <a href="{{asset($item)}}" target="_blank" style="font-weight: bold;text-decoration:none;padding-left: 70px;">Open</a>
 					  </div>
 					@endif
 				   	@if($key != 0)
 						<div class="col-md-2" id="vl_pdf_{{$key}}">
-						 <embed width="100%" height="100%" name="plugin" src="{{asset('com_pdf').'/'.$item}}" type="application/pdf">
+						 <embed width="100%" height="100%" name="plugin" src="{{asset($item)}}" type="application/pdf">
 						 <a href="#" onclick="remove('{{$key}}')"style="font-weight: bold;text-decoration:none;padding-left: 10px;">Remove</a>
-						 <a href="{{asset('com_pdf').'/'.$item}}" target="_blank" style="font-weight: bold;text-decoration:none;padding-left: 70px;">Open</a>
+						 <a href="{{asset($item)}}" target="_blank" style="font-weight: bold;text-decoration:none;padding-left: 70px;">Open</a>
 					  </div>
 					@endif
                   @endforeach

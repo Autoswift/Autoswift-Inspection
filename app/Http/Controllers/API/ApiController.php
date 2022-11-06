@@ -191,50 +191,42 @@ class ApiController extends BaseController
             if(isset($validator) && $validator->fails()){
                 return $this->sendError('Validation Error.', $validator->errors());       
             }
+			$user = User::findOrFail(Auth()->id());
             $input=$request->all();
-            if($file = $request->file('icard')) {        
-                $optimizeImage = Image::make($file);
-                $optimizePath = public_path().'/document/';
-                $name = time().$file->getClientOriginalName();
-                $optimizeImage->save($optimizePath.$name, 72);
-                $input['icard'] = $name;
+			$optimizePath = config('global.employees_main_folder').$user->id.'/';
+			if(!file_exists(public_path().$optimizePath)) {
+				mkdir(public_path().$optimizePath, 0777, true);
+			}
+            if($file = $request->file('icard')) {
+				$input['icard'] = uploadDocs($file, $optimizePath, $user->icard);
                 $input['status']='pending';
-				$firebaseToken = User::where('id','=',Auth()->id())->pluck('firebase_id')->all();
-                $body="Registration request submitted";
-                $title='Registration';
-        		PushNotification::dispatch($firebaseToken,$body,$title);
+				//$firebaseToken = User::where('id','=',Auth()->id())->pluck('firebase_id')->all();
+                //$body="Registration request submitted";
+                //$title='Registration';
+        		//PushNotification::dispatch($firebaseToken,$body,$title);
             }
             if($file = $request->file('govt_issue_id')) {        
-                $optimizeImage = Image::make($file);
-                $optimizePath = public_path().'/document/';
-                $name = time().$file->getClientOriginalName();
-                $optimizeImage->save($optimizePath.$name, 72);
-                $input['govt_issue_id'] = $name;
+                $input['govt_issue_id'] = uploadDocs($file, $optimizePath, $user->icard);;
             }   
-            if($file = $request->file('back_govt_card')) {        
-                $optimizeImage = Image::make($file);
-                $optimizePath = public_path().'/document/';
-                $name = time().$file->getClientOriginalName();
-                $optimizeImage->save($optimizePath.$name, 72);
-                $input['back_govt_card'] = $name;
+            if($file = $request->file('back_govt_card')) {
+                $input['back_govt_card'] = uploadDocs($file, $optimizePath, $user->icard);
             }
             if($request->password){
                 $input['pass1'] =$request->password;
                 $input['password'] = Hash::make($request->password);
             }
-            $data = User::findOrFail(Auth()->id());
-            $data->update($input);
+            $user->update($input);
             return $this->sendResponse($input,'Profile Updated successfully.');
         }
         $profile=User::select('email','valuations.name as company_name','username','pass1','profile_name','users.address','icard','govt_issue_id','back_govt_card')->where('users.id','=',Auth()->id())->leftJoin('valuations','valuations.id','=','users.comp_id')->first();
         if($profile->icard){
-             $profile->icard=asset('document/'.$profile->icard);
+             $profile->icard=asset($profile->icard);
         }
         if($profile->govt_issue_id){
-            $profile->govt_issue_id=asset('document/'.$profile->govt_issue_id);
+            $profile->govt_issue_id=asset($profile->govt_issue_id);
         }
         if($profile->back_govt_card){
-            $profile->back_govt_card=asset('document/'.$profile->back_govt_card);
+            $profile->back_govt_card=asset($profile->back_govt_card);
         }
        
         return $this->sendResponse($profile,'Profile retrieved successfully.');
@@ -249,79 +241,72 @@ class ApiController extends BaseController
 		}  
         $input=array();
 		$update=Finance::findOrFail($request->report_id);
-		if($request->file('uploadPhotos')){
+		/*if($request->file('uploadPhotos')){
+			
+            foreach($request->file('uploadPhotos') as $fileKey => $file){
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+				$images[$fileKey] = uploadDocs($file, $optimizeImagePath, null, $filename);
+            }
+            $input['photo']=json_encode($images);
+            if(!empty($update['photo'])){
+                $p=json_decode($update['photo']);
+                $input['photo']=json_encode(array_merge($p,$images)); 
+            }   
+        }*/
+		
+		$input['approve_photo'] = [];
+        if(!empty($request->approve_photo)) {
+            $input['approve_photo'] = $request->approve_photo; 
+        }
+        if($request->file('uploadPhotos')){
 			$optimizeImagePath = config('global.report_main_folder').$update->id.config('global.report_photos');
 			if(!file_exists(public_path().$optimizeImagePath)) {
 				mkdir(public_path().$optimizeImagePath, 0777, true);
 			}
-            foreach($request->file('uploadPhotos') as $fileKey => $file){
-				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
-				$images[$fileKey] = uploadDocs($file, $optimizeImagePath, null, $filename);
-                /*$optimizeImage = Image::make($file);
-                $name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
-                $optimizeImage->save(public_path().$optimizeImagePath.$name,50);
-                $images[$fileKey]=$optimizeImagePath.$name;*/
+			$p=json_decode($update['photo'], 1);
+            foreach(config('global.photo_types') as $photo_type) {
+				if(!isset($input['approve_photo'][$photo_type])) {
+					$input['approve_photo'][$photo_type] = [];
+				}
+				$images[$photo_type] = [];
+				if(!empty($request->file('uploadPhotos')[$photo_type])) {
+					foreach($request->file('uploadPhotos')[$photo_type] as $fileKey => $file){
+						$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+						$images[$photo_type][$fileKey] = uploadDocs($file, $optimizeImagePath, null, $filename);
+						array_push($input['approve_photo'][$photo_type], $images[$photo_type][$fileKey]);
+					}
+				}
+				if(!empty($p[$photo_type])) {
+					$images[$photo_type] = array_merge($p[$photo_type], $images[$photo_type]);
+				}
             }
             $input['photo']=json_encode($images);
-            //$input['approve_photo']=json_encode($images);
-            if(!empty($update['photo'])){
-                $p=json_decode($update['photo']);
-                $input['photo']=json_encode(array_merge($p,$images));  
-                //$ap=json_decode($update['approve_photo']);
-                //$input['approve_photo']=json_encode(array_merge($ap,$images));  
-            }   
         }
+		$input['approve_photo']=json_encode($input['approve_photo']);
 		
-		$optimizeVideoPath = config('global.report_main_folder').$update->id.config('global.report_videos');
-		if($request->file('uploadVideos')){
-			if(!empty($update['videos'])){
-                $videos = json_decode($update['videos'], 1);
+		$input['approve_video'] = [];
+		if(!empty($request->approve_video)) {
+			$input['approve_video'] = $request->approve_video;
+		}
+		if($request->file('uploadVideos')) {
+			$optimizeVideoPath = config('global.report_main_folder').$update->id.config('global.report_videos');
+			if(!file_exists(public_path().$optimizeVideoPath)) {
+				mkdir(public_path().$optimizeVideoPath, 0777, true);
 			}
+			$videos = json_decode($update['videos'], 1);
             foreach($request->file('uploadVideos') as $fileKey=>$file){
-				$name = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
-                $file->move(public_path().$optimizeVideoPath, $name);
+				$filename = str_replace(' ', '_',time().Str::random(15).'.'.$file->extension());
+                $file->move(public_path().$optimizeVideoPath, $filename);
 				if(!empty($videos[$fileKey]) && \File::exists(public_path().$videos[$fileKey])) {
                     \File::delete(public_path().$videos[$fileKey]);
 				}
-                $videos[$fileKey]=$optimizeVideoPath.$name;
+                $input['approve_video'][$fileKey] = $videos[$fileKey] = $optimizeVideoPath.$filename;
             }
             $input['videos']=json_encode($videos);
         }
-        /*if($request->file()){
-			$optimizePath = config('global.report_main_folder').$newReport->id.config('global.report_photos');
-			if(!file_exists(public_path().$optimizePath)) {
-				mkdir(public_path().$optimizePath, 0777, true);
-			}
-            foreach($request->file() as $key => $file){
-                if($key!='video1' && $key!='video2'){
-                    $optimizeImage = Image::make($file);
-                    $optimizePath = public_path().'/finance/';
-                    $name = str_replace(' ', '_', time().Str::random(15).'.'.$file->extension());
-                    $optimizeImage->save($optimizePath.$name,50);
-                    if($key=='chassis_photo'){
-                        $input_data['chachees_number_photo']=$name;
-                    }
-                    elseif($key=='selfie'){
-                        $input_data['selfie']=$name;
-                        $images[]=$name;
-                    }else{
-                        $images[]=$name;
-                    }
-                }elseif($key=='video1' || $key=='video2'){
-                    $filename1 = str_replace(' ', '_', time().$file->getClientOriginalName());
-                    $path1= public_path().'/videos/';
-                    $file->move($path1, $filename1);
-                    $videos[]=$filename1;
-                }
-            }
-            if(!empty($images)){
-                $input_data['photo']=json_encode($images); 
-            }
-            if(!empty($videos)){
-                $input_data['videos']=json_encode($videos); 
-            }
-        }*/
-        if($update->update($input)) {
+		$input['approve_video']=json_encode($input['approve_video']);
+		
+		if($update->update($input)) {
             return $this->sendResponse($input,'Report Submited successfully.');
         }     
         return $this->sendResponse([],'Somthing Went wrong.');

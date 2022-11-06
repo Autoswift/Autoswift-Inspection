@@ -1,5 +1,7 @@
 <?php
 return [
+	'valuation_main_folder' => '/vib_docs/',
+	'valuation_pdfs' => '/pdfs/',
 	'employees_main_folder' => '/employees_docs/',
 	'staffs_main_folder' => '/staffs_docs/',
 	'report_main_folder' => '/reports_docs/',
